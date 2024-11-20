@@ -15,38 +15,9 @@ function get_hostname {
   export SHORTNAME=${HOSTNAME%%.*}
 }
 
-#function git_branch() { 
-#  gitbranch=$(git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'); 
-#}
 
-#function user_color {
-#  id | grep "root" > /dev/null
-#  RETVAL=$?
-#  if [[ $RETVAL == 0 ]]; then
-#    usercolor="[0;31m";
-#  else
-#    usercolor="[0;32m";
-#  fi
-#}
-
-#function settitle() {
-#  u=${USERNAME}
-#  h="$u@${HOSTNAME}"
-#  echo -ne "\e]2;$h\a\e]1;$h\a";
-#}
-
-# Set directory colors
-#eval `dircolors ~/.dir_colors`
-
-
-#user_color
-#PROMPT_COMMAND='settitle; git_branch; get_hostname; history -a;'
-#PS1='\[\e${usercolor}\][\u]\[\e${cwdcolor}\][${PWD}]\[\e${branchcolor}\]${gitbranch}\[\e${inputcolor}\] ~ $ '
-#PS1='\n\[\e${cwdcolor}\][${PWD}] \[\e${branchcolor}\]${gitbranch}\n\ [\e${usercolor}\][\u] \[\e${host_name}\][${SHORTNAME}]\[\e${inputcolor}\] $ '
-#export PS1
 
 # Aliases
-#alias ls='ls -a -l --color'
 alias grep='grep -n --color'
 alias ls=' exa --header --long -a'
 
