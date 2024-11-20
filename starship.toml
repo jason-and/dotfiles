@@ -1,0 +1,62 @@
+# ~/.dotfiles/starship.toml
+
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+format = """
+$battery\
+$username\
+$hostname\
+$directory\
+$conda\
+$git_branch\
+$git_state\
+$git_status\
+$cmd_duration\
+$character"""
+
+[line_break]
+disabled = true
+
+[battery]
+full_symbol = "•"
+charging_symbol = "⇡"
+discharging_symbol = "⇣"
+
+[username]
+format = '[$user]($style) '
+disabled = true
+show_always = false
+
+[directory]
+format = '\[[ $path ]($style)\] '
+disabled  = false
+truncate_to_repo = true
+truncation_length = 100
+
+[package]
+disabled = false
+format = 'via [🎁 $version](208 bold) '
+
+[conda]
+symbol = "🅒"
+
+[docker_context]
+symbol = " "
+[git_branch]
+symbol = " "
+
+[git_commit]
+tag_symbol = '  '
+
+
+[java]
+symbol = " "
+
+[python]
+symbol = "🐍"
+
+
