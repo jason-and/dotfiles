@@ -22,7 +22,7 @@ config.line_height = 1
 config.harfbuzz_features = { 'zero' }
 
 config.dpi = 96.0
-config_bold_brightens_ansi_colors = true
+config.bold_brightens_ansi_colors = true
 
 config.window_padding = {
 left = "32pt", 
@@ -44,13 +44,17 @@ config.cursor_blink_rate = 600
 
 
 --- Tab Bar
-enable_tab_bar = true
-use_fancy_tab_bar = false
-hide_tab_bar_if_only_one_tab = true
-show_tab_index_in_tab_bar = false
+config.enable_tab_bar = true
+config.use_fancy_tab_bar = false 
+config.hide_tab_bar_if_only_one_tab = true
+config.show_tab_index_in_tab_bar = false
+config.tab_bar_at_bottom = true
+
+config.window_close_confirmation = "NeverPrompt"
 
 
-window_close_confirmation = "NeverPrompt"
+
+
 
 
 -- and finally, return the configuration to wezterm
