@@ -92,5 +92,12 @@ _fzf_compgen_dir() {
   fd --type=d --hidden --exclude .git . "$1"
 }
 
+autoload -Uz +X compinit && compinit
+
+## case insensitive path-completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' menu select
+
+
 
 eval "$(starship init zsh)"
