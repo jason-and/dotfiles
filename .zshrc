@@ -2,7 +2,6 @@ export STARSHIP_CONFIG=~/.starship.toml
 export FPATH="/usr/bin/eza/completions/zsh:$FPATH"
 
 
-
 # history setup
 HISTFILE=$HOME/.zhistory
 SAVEHIST=1000
