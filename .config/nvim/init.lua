@@ -1,40 +1,16 @@
---[[
-    If you don't know anything about Lua, I recommend taking some time to read through
-    a guide. One possible example which will only take 10-15 minutes:
-      - https://learnxinyminutes.com/docs/lua/
+-- NOTE: Throughout this config, some plugins are
+-- disabled by default. This is because I don't use
+-- them on a daily basis, but I still want to keep
+-- them around as examples.
+-- You can enable them by changing `enabled = false`
+-- to `enabled = true` in the respective plugin spec.
+-- Some of these also have the
+-- PERF: (performance) comment, which
+-- indicates that I found them to slow down the config.
+-- (may be outdated with newer versions of the plugins,
+-- check for yourself if you're interested in using them)
 
-    After understanding a bit more about Lua, you can use `:help lua-guide` as a
-    reference for how Neovim integrates Lua.
-    - :help lua-guide
-    - (or HTML version): https://neovim.io/doc/user/lua-guide.html
-
-  Next, run AND READ `:help`.
-    This will open up a help window with some basic information
-    about reading, navigating and searching the builtin help documentation.
-    MOST IMPORTANTLY, we provide a keymap "<space>sh" to [s]earch the [h]elp documentation,
-    which is very useful when you're not exactly sure of what you're looking for.
---]]
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
-
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
-
--- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
-
--- [[ Setting options ]]
-require 'options'
-
--- [[ Basic Keymaps ]]
-require 'keymaps'
-
--- [[ Install `lazy.nvim` plugin manager ]]
-require 'lazy-bootstrap'
-
--- [[ Configure and install plugins ]]
-require 'lazy-plugins'
-
--- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+require 'config.global'
+require 'config.lazy'
+require 'config.autocommands'
+require 'config.redir'
