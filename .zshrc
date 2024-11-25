@@ -21,7 +21,6 @@ alias cat='batcat'
 
 alias ls="eza --color=always --long -G --git -a -m --group-directories-first  --icons=always --no-time --no-user --no-permissions"
 
-
 alias reload-zsh="source ~/.zshrc"
 
 # >>> conda initialize >>>
@@ -96,7 +95,6 @@ autoload -Uz +X compinit && compinit
 ## case insensitive path-completion
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' menu select
-
 
 
 eval "$(starship init zsh)"
