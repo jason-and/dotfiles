@@ -1,7 +1,5 @@
 -- global options
 
-local animals = require('misc.style').animals
-
 -- proper colors
 vim.opt.termguicolors = true
 
@@ -10,9 +8,18 @@ vim.api.nvim_set_hl(0, 'TermCursor', { fg = '#A6E3A1', bg = '#A6E3A1' })
 
 -- disable fill chars (the ~ after the buffer)
 vim.o.fillchars = 'eob: '
+-- backspace
+vim.opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position
+-- cursor line
+vim.opt.cursorline = true -- highlight the current cursor line
+
+-- turn on termguicolors for nightfly colorscheme to work
+-- (have to use iterm2 or any other true color terminal)
+vim.opt.termguicolors = true
+vim.opt.background = "dark" -- colorschemes that can be light or dark will be made dark
+vim.opt.signcolumn = "yes" -- show sign column so that text doesn't shifted
 
 -- more opinionated
-vim.opt.number = true -- show linenumbers
 vim.opt.mouse = 'a' -- enable mouse
 vim.opt.mousefocus = true
 vim.opt.clipboard:append 'unnamedplus' -- use system clipboard
@@ -20,17 +27,25 @@ vim.opt.clipboard:append 'unnamedplus' -- use system clipboard
 vim.opt.timeoutlen = 400 -- until which-key pops up
 vim.opt.updatetime = 250 -- for autocommands and hovers
 
+-- line numbers
+vim.opt.relativenumber = true
+vim.opt.number = true -- show linenumbers
 -- don't ask about existing swap files
 vim.opt.shortmess:append 'A'
 
+-- directory tree style
+-- vim.cmd("let g:netrw_liststyle = 3")
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 -- mode is already in statusline
 vim.opt.showmode = false
 
 -- use less indentation
-local tabsize = 2
-vim.opt.expandtab = true
-vim.opt.shiftwidth = tabsize
-vim.opt.tabstop = tabsize
+-- tabs & indentation
+vim.opt.tabstop = 2 -- 2 spaces for tabs (prettier default)
+vim.opt.shiftwidth = 2 -- 2 spaces for indent width
+vim.opt.expandtab = true -- expand tab to spaces
+vim.opt.autoindent = true -- copy indent from current line when starting new one
 
 -- space as leader
 vim.g.mapleader = ' '
@@ -75,8 +90,8 @@ let g:currentmode={
 ]]
 
 math.randomseed(os.time())
-local i = math.random(#animals)
-vim.opt.statusline = '%{%g:currentmode[mode()]%} %{%reg_recording()%} %* %t | %y | %* %= c:%c l:%l/%L %p%% %#NonText# ' .. animals[i] .. ' %*'
+
+vim.opt.statusline = '%{%g:currentmode[mode()]%} %{%reg_recording()%} %* %t | %y | %* %= c:%c l:%l/%L %p%% %#NonText# %*'
 
 -- hide cmdline when not used
 vim.opt.cmdheight = 1

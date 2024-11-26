@@ -23,6 +23,13 @@ local cmap = function(key, effect)
   vim.keymap.set('c', key, effect, { silent = true, noremap = true })
 end
 
+
+
+-- use jk to exit insert mode
+vim.keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
+
+-- clear search highlights
+vim.keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 -- move in command line
 cmap('<C-a>', '<Home>')
 
@@ -296,6 +303,10 @@ local function get_otter_symbols_lang()
 end
 
 vim.keymap.set("n", "<leader>os", get_otter_symbols_lang, {desc = "otter [s]ymbols"})
+
+vim.keymap.set('n', '<leader>fn/', function ()
+  builtin.find_files { cwd = vim.fn.stdpath 'config'}
+end, {desc = '[F]ind [N]eovim files'})
 
 
 -- normal mode with <leader>

@@ -198,6 +198,11 @@ return {
   { -- filetree
     'nvim-tree/nvim-tree.lua',
     enabled = true,
+    version = "*",
+    lazy = false,
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+  },
     keys = {
       { '<c-b>', ':NvimTreeToggle<cr>', desc = 'toggle nvim-tree' },
     },
@@ -222,7 +227,7 @@ return {
   -- or a different filetree
   {
     'nvim-neo-tree/neo-tree.nvim',
-    enabled = false,
+    enabled = false, 
     branch = 'v3.x',
     dependencies = {
       'nvim-lua/plenary.nvim',

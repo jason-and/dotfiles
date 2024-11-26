@@ -14,6 +14,12 @@ return {
     },
   },
 
+  {
+	"kmontocam/nvim-conda",
+	dependencies = { "nvim-lua/plenary.nvim" },
+    },
+
+
   { -- directly open ipynb files as quarto docuements
     -- and convert back behind the scenes
     'GCBallesteros/jupytext.nvim',

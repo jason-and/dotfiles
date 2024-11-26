@@ -16,7 +16,19 @@ return {
       vim.api.nvim_set_hl(0, 'TermCursor', { fg = '#A6E3A1', bg = '#A6E3A1' })
     end,
   },
-
+-- Using lazy.nvim
+{
+  'deparr/tairiki.nvim',
+  lazy = false,
+  enabled = true,
+  priority = 1000, -- only necessary if you use tairiki as default theme
+  config = function()
+    require('tairiki').setup {
+      -- optional configuration here
+    }
+    require('tairiki').load() -- only necessary to use as default theme, has same behavior as ':colorscheme tairiki'
+  end,
+},
   {
     'oxfist/night-owl.nvim',
     enabled = false,
@@ -32,7 +44,7 @@ return {
 
   {
     'rebelot/kanagawa.nvim',
-    enabled = true,
+    enabled = false,
     lazy = false,
     priority = 1000,
     config = function()
