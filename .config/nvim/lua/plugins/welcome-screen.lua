@@ -8,7 +8,9 @@ return {
       local dashboard = require 'alpha.themes.dashboard'
 
       -- Set header
-      -- dashboard.section.header.val = {}
+      -- dashboard.section.header.val = {
+
+      -- }
 
       -- Set menu
       dashboard.section.buttons.val = {

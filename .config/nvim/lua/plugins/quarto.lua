@@ -14,6 +14,7 @@ return {
     },
   },
 
+  -- for easy switching between conda enviroments
   {
 	"kmontocam/nvim-conda",
 	dependencies = { "nvim-lua/plenary.nvim" },

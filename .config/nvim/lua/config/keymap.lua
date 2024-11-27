@@ -304,7 +304,8 @@ end
 
 vim.keymap.set("n", "<leader>os", get_otter_symbols_lang, {desc = "otter [s]ymbols"})
 
-vim.keymap.set('n', '<leader>fn/', function ()
+local builtin = require 'telescope.builtin'
+vim.keymap.set('n', '<leader>fn', function ()
   builtin.find_files { cwd = vim.fn.stdpath 'config'}
 end, {desc = '[F]ind [N]eovim files'})
 
@@ -313,6 +314,7 @@ end, {desc = '[F]ind [N]eovim files'})
 wk.add({
   {
     { "<leader><cr>", send_cell, desc = "run code cell" },
+    {'<leader>fn', desc = '[n]eovim files'},
     { "<leader>c", group = "[c]ode / [c]ell / [c]hunk" },
     { "<leader>ci", new_terminal_ipython, desc = "new [i]python terminal" },
     { "<leader>cj", new_terminal_julia, desc = "new [j]ulia terminal" },

@@ -22,6 +22,7 @@ alias cat='batcat'
 alias ls="eza --color=always --long -G --git -a -m --group-directories-first  --icons=always --no-time --no-user --no-permissions"
 
 alias reload-zsh="source ~/.zshrc"
+alias zshconfig="nvim ~/.zshrc"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -51,7 +52,7 @@ unset __conda_setup
 # ------FZF
 
 # set up fzf key bindings and fuzzy completion
-source /usr/share/doc/fzf/examples/key-bindings.zsh
+source <(fzf --zsh)
 
 ## -- Use fd instead of fzf --
 
