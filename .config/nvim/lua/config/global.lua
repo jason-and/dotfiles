@@ -2,7 +2,8 @@
 
 -- proper colors
 vim.opt.termguicolors = true
-
+vim.opt.background = "dark" -- colorschemes that can be light or dark will be made dark
+vim.opt.signcolumn = "yes" -- show sign column so that text doesn't shift
 -- show insert mode in terminal buffers
 vim.api.nvim_set_hl(0, 'TermCursor', { fg = '#A6E3A1', bg = '#A6E3A1' })
 

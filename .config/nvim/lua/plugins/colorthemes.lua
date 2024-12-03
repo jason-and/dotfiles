@@ -20,12 +20,12 @@ return {
 {
   'deparr/tairiki.nvim',
   lazy = false,
-  enabled = true,
+  enabled = false,
   priority = 1000, -- only necessary if you use tairiki as default theme
   config = function()
     require('tairiki').setup {
-      -- optional configuration here
-    }
+        style = 'dark'
+      }
     require('tairiki').load() -- only necessary to use as default theme, has same behavior as ':colorscheme tairiki'
   end,
 },
@@ -44,7 +44,7 @@ return {
 
   {
     'rebelot/kanagawa.nvim',
-    enabled = false,
+    enabled = true,
     lazy = false,
     priority = 1000,
     config = function()

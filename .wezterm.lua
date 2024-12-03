@@ -10,8 +10,9 @@ end
 
 --- Appearance
 --config.color_scheme = 'Belafonte Night (Gogh)'
-config.color_scheme = "Tomorrow (dark) (terminal.sexy)"
+-- config.color_scheme = "Tomorrow (dark) (terminal.sexy)"
 --config.color_scheme = 'Twilight (Gogh)'
+config.color_scheme = 'Kanagawa (Gogh)'
 
 -- fonts
 config.font_size = 14
