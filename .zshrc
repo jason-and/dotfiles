@@ -1,6 +1,7 @@
 export STARSHIP_CONFIG=~/.starship.toml
 export FPATH="/usr/bin/eza/completions/zsh:$FPATH"
-
+export PATH="$HOME/.cargo/bin:$PATH"
+export EDITOR=nvim
 
 # history setup
 HISTFILE=$HOME/.zhistory
@@ -11,8 +12,6 @@ setopt hist_expire_dups_first
 setopt hist_ignore_dups
 setopt hist_verify
 
-# ---- Zoxide (better cd) ----
-eval "$(zoxide init zsh)"
 
 # Aliases
 alias grep='grep -n --color'
@@ -93,6 +92,12 @@ _fzf_compgen_dir() {
 
 autoload -Uz +X compinit && compinit
 
+# auto suggestions
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# ---- Zoxide (better cd) ----
+eval "$(zoxide init zsh)"
+alias cd="z"
 ## case insensitive path-completion
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' menu select
