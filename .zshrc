@@ -94,7 +94,6 @@ autoload -Uz +X compinit && compinit
 
 # auto suggestions
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-
 # ---- Zoxide (better cd) ----
 eval "$(zoxide init zsh)"
 alias cd="z"

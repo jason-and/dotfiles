@@ -7,7 +7,7 @@ if wezterm.config_builder then
 	config = wezterm.config_builder()
 end
 -- config
-
+config.enable_wayland = true
 --- Appearance
 --config.color_scheme = 'Belafonte Night (Gogh)'
 -- config.color_scheme = "Tomorrow (dark) (terminal.sexy)"
@@ -15,7 +15,7 @@ end
 config.color_scheme = 'Kanagawa (Gogh)'
 
 -- fonts
-config.font_size = 14
+config.font_size = 11
 config.line_height = 1
 config.harfbuzz_features = { "zero" }
 
@@ -23,7 +23,7 @@ config.harfbuzz_features = { "zero" }
 
 config.window_close_confirmation = "NeverPrompt"
 config.window_background_opacity = 1.0
-config.dpi = 96.0
+
 config.bold_brightens_ansi_colors = true
 
 config.window_padding = {
@@ -40,7 +40,7 @@ config.inactive_pane_hsb = {
 }
 
 -- SIZE of window:
-config.initial_rows = 55
+config.initial_rows = 50
 config.initial_cols = 130
 config.window_decorations = "RESIZE"
 config.scrollback_lines = 3000
