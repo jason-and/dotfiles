@@ -18,6 +18,7 @@ config.color_scheme = 'Kanagawa (Gogh)'
 config.font_size = 11
 config.line_height = 1
 config.harfbuzz_features = { "zero" }
+config.font = wezterm.font 'JetBrainsMono Nerd Font'
 
 ----window
 
@@ -40,8 +41,8 @@ config.inactive_pane_hsb = {
 }
 
 -- SIZE of window:
-config.initial_rows = 50
-config.initial_cols = 130
+config.initial_rows = 50 
+config.initial_cols = 150
 config.window_decorations = "RESIZE"
 config.scrollback_lines = 3000
 
