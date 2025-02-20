@@ -1,30 +1,26 @@
 -- pull in the wezterm API
 local wezterm = require("wezterm")
 local act = wezterm.action
+
 -- this will hold the configuration
 local config = wezterm.config_builder()
 if wezterm.config_builder then
 	config = wezterm.config_builder()
 end
+
 -- config
 config.enable_wayland = true
 --- Appearance
---config.color_scheme = 'Belafonte Night (Gogh)'
--- config.color_scheme = "Tomorrow (dark) (terminal.sexy)"
---config.color_scheme = 'Twilight (Gogh)'
 config.color_scheme = 'Kanagawa (Gogh)'
 
 -- fonts
-config.font_size = 11
-config.line_height = 1
+config.font_size = 13
+config.line_height = 1.2
 config.harfbuzz_features = { "zero" }
-config.font = wezterm.font 'JetBrainsMono Nerd Font'
+config.font = wezterm.font 'CommitMono Nerdfont'
 
 ----window
-
 config.window_close_confirmation = "NeverPrompt"
-config.window_background_opacity = 1.0
-
 config.bold_brightens_ansi_colors = true
 
 config.window_padding = {
@@ -41,8 +37,8 @@ config.inactive_pane_hsb = {
 }
 
 -- SIZE of window:
-config.initial_rows = 50 
-config.initial_cols = 150
+config.initial_rows = 54
+config.initial_cols = 220
 config.window_decorations = "RESIZE"
 config.scrollback_lines = 3000
 
@@ -87,33 +83,8 @@ config.keys = {
 	-- Lastly, workspace
 	{ key = "w", mods = "LEADER", action = act.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }) },
 }
--- I can use the tab navigator (LDR t), but I also want to quickly navigate tabs with index
-for i = 1, 9 do
-	table.insert(config.keys, {
-		key = tostring(i),
-		mods = "LEADER",
-		action = act.ActivateTab(i - 1),
-	})
-end
 
-config.key_tables = {
-	resize_pane = {
-		{ key = "h", action = act.AdjustPaneSize({ "Left", 1 }) },
-		{ key = "j", action = act.AdjustPaneSize({ "Down", 1 }) },
-		{ key = "k", action = act.AdjustPaneSize({ "Up", 1 }) },
-		{ key = "l", action = act.AdjustPaneSize({ "Right", 1 }) },
-		{ key = "Escape", action = "PopKeyTable" },
-		{ key = "Enter", action = "PopKeyTable" },
-	},
-	move_tab = {
-		{ key = "h", action = act.MoveTabRelative(-1) },
-		{ key = "j", action = act.MoveTabRelative(-1) },
-		{ key = "k", action = act.MoveTabRelative(1) },
-		{ key = "l", action = act.MoveTabRelative(1) },
-		{ key = "Escape", action = "PopKeyTable" },
-		{ key = "Enter", action = "PopKeyTable" },
-	},
-}
+
 wezterm.on("update-status", function(window, pane)
 	-- Workspace name
 	local stat = window:active_workspace()

@@ -1,16 +1,23 @@
--- NOTE: Throughout this config, some plugins are
--- disabled by default. This is because I don't use
--- them on a daily basis, but I still want to keep
--- them around as examples.
--- You can enable them by changing `enabled = false`
--- to `enabled = true` in the respective plugin spec.
--- Some of these also have the
--- PERF: (performance) comment, which
--- indicates that I found them to slow down the config.
--- (may be outdated with newer versions of the plugins,
--- check for yourself if you're interested in using them)
+-- Set <space> as the leader key
+-- See `:help mapleader`
+--  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
+vim.g.mapleader = ' '
+vim.g.maplocalleader = ' '
 
-require 'config.global'
-require 'config.lazy'
-require 'config.autocommands'
-require 'config.redir'
+-- Set to true if you have a Nerd Font installed and selected in the terminal
+vim.g.have_nerd_font = true
+
+-- [[ Setting options ]]
+require 'options'
+
+-- [[ Install `lazy.nvim` plugin manager ]]
+require 'lazy-bootstrap'
+
+-- [[ Configure and install plugins ]]
+require 'lazy-plugins'
+
+-- [[ Basic Keymaps ]]
+require 'keymaps'
+
+-- The line beneath this is called `modeline`. See `:help modeline`
+-- vim: ts=2 sts=2 sw=2 et

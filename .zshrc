@@ -25,6 +25,9 @@ alias cat='bat'
 alias ls="eza --color=always --long -G --git -a -m --group-directories-first  --icons=always --no-time --no-user --no-permissions"
 alias reload-zsh="source ~/.zshrc"
 alias zshconfig="nvim ~/.zshrc"
+alias r="radian"
+alias copy="wl-copy"
+alias pi='ssh pi4@192.168.0.220'
 
 
 # =============================================================================
@@ -34,18 +37,18 @@ alias zshconfig="nvim ~/.zshrc"
 # =============================================================================
 # Fastfetch
 # =============================================================================
-if [[ $(tty) == *"pts"* ]]; then
-    fastfetch --config examples/13
-else
-    echo
-    if [ -f /bin/qtile ]; then
-        echo "Start Qtile X11 with command Qtile"
-    fi
-    if [ -f /bin/hyprctl ]; then
-        echo "Start Hyprland with command Hyprland"
-    fi
-fi
-
+# if [[ $(tty) == *"pts"* ]]; then
+#     fastfetch --config examples/13
+# else
+#     echo
+#     if [ -f /bin/qtile ]; then
+#         echo "Start Qtile X11 with command Qtile"
+#     fi
+#     if [ -f /bin/hyprctl ]; then
+#         echo "Start Hyprland with command Hyprland"
+#     fi
+# fi
+#
 # =============================================================================
 # FZF Configuration (Fuzzy Finder)
 # =============================================================================
@@ -120,5 +123,20 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
+# vv() {
+#   # Assumes all configs exist in directories named ~/.config/nvim-*
+  # local config=$(fd --max-depth 1 --glob 'nvim*' ~/dotfiles/.config | fzf --prompt="Neovim Configs > " --height=~50% --layout=reverse --border --exit-0)
+  #
+  # If I exit fzf without selecting a config, don't open Neovim
+  # [[ -z $config ]] && echo "No config selected" && return
+  #
+  # Open Neovim with the selected config
+#   NVIM_APPNAME=$(basename $config) nvim $@
+# }
+
+
 # Starship prompt
 eval "$(starship init zsh)"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/andrew/.lmstudio/bin"
