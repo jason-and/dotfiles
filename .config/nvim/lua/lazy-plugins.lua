@@ -54,7 +54,9 @@ require("lazy").setup({
 
   require("plugins/neo-tree"),
 
-  require("plugins/autopairs"),
+  require("plugins/autopairs")
+
+--  require("plugins/nunjuks")
 
 
 }, {

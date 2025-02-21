@@ -62,8 +62,11 @@ export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git
 
 # Preview configuration
 show_file_or_dir_preview="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
-export FZF_CTRL_T_OPTS="--preview '$show_file_or_dir_preview'"
+export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always {}'"
 export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
+
+
+
 
 # Advanced customization of fzf options
 _fzf_comprun() {
@@ -122,17 +125,6 @@ unset __conda_setup
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-# vv() {
-#   # Assumes all configs exist in directories named ~/.config/nvim-*
-  # local config=$(fd --max-depth 1 --glob 'nvim*' ~/dotfiles/.config | fzf --prompt="Neovim Configs > " --height=~50% --layout=reverse --border --exit-0)
-  #
-  # If I exit fzf without selecting a config, don't open Neovim
-  # [[ -z $config ]] && echo "No config selected" && return
-  #
-  # Open Neovim with the selected config
-#   NVIM_APPNAME=$(basename $config) nvim $@
-# }
 
 
 # Starship prompt
