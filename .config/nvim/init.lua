@@ -4,20 +4,29 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+
+-- Define a simple print function for troubleshooting
+  -- Usage: _G.debug_print("Some message", someTable)
+  _G.debug_print = function(...)
+    local args = {...}
+    for i, v in ipairs(args) do
+      if type(v) == "table" then
+        args[i] = vim.inspect(v)
+      end
+    end
+    print(unpack(args))
+  end
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
-require 'options'
+require('core')
 
 -- [[ Install `lazy.nvim` plugin manager ]]
-require 'lazy-bootstrap'
-
 -- [[ Configure and install plugins ]]
-require 'lazy-plugins'
+require('plugins')
 
--- [[ Basic Keymaps ]]
-require 'keymaps'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
