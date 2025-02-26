@@ -44,6 +44,8 @@ require("lazy").setup({
 
   require("plugins/oil"),
 
+  require("plugins/neo-tree"),
+
   require("plugins/nvim-tree"),
 
   require("plugins/gx"),
@@ -52,14 +54,19 @@ require("lazy").setup({
 
   require("plugins/quarto"),
 
-  require("plugins/neo-tree"),
+  require("plugins/autopairs"),
 
-  require("plugins/autopairs")
+  require("plugins/toggleterm"), 
 
---  require("plugins/nunjuks")
+  require("plugins/comment"),
 
+  require("plugins/git"),
 
-}, {
+  require("plugins/workspaces")
+
+},
+
+{
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
