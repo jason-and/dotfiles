@@ -1,10 +1,13 @@
-------------------------------------------------------------------
---- Utilities
-------------------------------------------------------------------
---vim.g["quarto_is_r_mode"] = nil
---vim.g["reticulate_running"] = false
+-- lua/core/keymaps.lua
+-- Core keymaps that aren't tied to specific plugins
 
--- Sets up keymapping functions for each mode
+local wk = require("which-key")
+
+------------------------------------------------------------------
+--- Utility functions for keymapping
+------------------------------------------------------------------
+-- These helper functions make mapping keys more concise
+
 -- Normal mode mappings
 local nmap = function(key, effect, desc)
 	vim.keymap.set("n", key, effect, {
@@ -60,21 +63,20 @@ _G.keymap_util = {
 }
 
 ------------------------------------------------------------------
--- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
+-- Basic editor keymaps (not plugin specific)
 ------------------------------------------------------------------
+
 -- Clear highlights on search when pressing <Esc> in normal mode
---  See `:help hlsearch`
 nmap("<Esc>", "<cmd>nohlsearch<CR>", "Clear Search Highlights")
 
--- use jk to exit insert mode
+-- Exit insert mode with jk
 imap("jk", "<ESC>", "Exit insert mode with jk")
 
 -- Diagnostic keymaps
 nmap("<leader>q", vim.diagnostic.setloclist, "Open diagnostic [Q]uickfix list")
 
 -- Disable ex mode (Q is often accidentally pressed)
-nmap("Q", "<Nop>") -- maps Q to nothing (Q is a older command mode called ex)
+nmap("Q", "<Nop>", "Disable Ex mode")
 
 -- Disable arrow keys to encourage hjkl usage
 nmap("<left>", '<cmd>echo "Use h to move!!"<CR>', "Disable left arrow")
@@ -97,13 +99,10 @@ nmap("gN", "Nzzzv", "Previous search result (centered)")
 nmap("<c-q>", "<cmd>q<cr>", "Close buffer")
 
 ------------------------------------------------------------------
---- WINDOW NAVIGATION
+-- Window and split navigation
 ------------------------------------------------------------------
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---  See `:help wincmd` for a list of all window commands
--- Navigate between splits
+-- Navigate between splits with CTRL+hjkl
 nmap("<C-h>", "<C-w>h", "Move to left split")
 nmap("<C-j>", "<C-w>j", "Move to split below")
 nmap("<C-k>", "<C-w>k", "Move to split above")
@@ -115,7 +114,6 @@ tmap("<C-h>", [[<Cmd>wincmd h<CR>]], "Move to left split from terminal")
 tmap("<C-j>", [[<Cmd>wincmd j<CR>]], "Move to split below from terminal")
 tmap("<C-k>", [[<Cmd>wincmd k<CR>]], "Move to split above from terminal")
 tmap("<C-l>", [[<Cmd>wincmd l<CR>]], "Move to right split from terminal")
-
 
 ------------------------------------------------------------------
 -- File/code navigation keymaps
@@ -162,6 +160,33 @@ imap("<c-x><c-x>", "<c-x><c-o>", "Trigger omnifunc completion")
 imap("<m-->", " <- ", "R assignment operator")
 imap("<m-m>", " |>", "R pipe operator")
 
+------------------------------------------------------------------
+-- Which-key groups
+------------------------------------------------------------------
+
+-- Define which-key groups for normal mode
+wk.register({
+  ["<leader>c"] = { name = "[C]ode / [C]ell / [C]hunk" },
+  ["<leader>d"] = { name = "[D]ebug" },
+  ["<leader>dt"] = { name = "[D]ebug [T]est" },
+  ["<leader>e"] = { name = "[E]dit" },
+  ["<leader>g"] = { name = "[G]it" },
+  ["<leader>gb"] = { name = "[G]it [B]lame" },
+  ["<leader>gd"] = { name = "[G]it [D]iff" },
+  ["<leader>h"] = { name = "[H]elp / [H]ide / Debug" },
+  ["<leader>hc"] = { name = "[H]ide [C]onceal" },
+  ["<leader>ht"] = { name = "[H]elp [T]reesitter" },
+  ["<leader>i"] = { name = "[I]mage" },
+  ["<leader>l"] = { name = "[L]anguage/LSP" },
+  ["<leader>ld"] = { name = "[L]anguage [D]iagnostics" },
+  ["<leader>o"] = { name = "[O]tter & C[O]de" },
+  ["<leader>q"] = { name = "[Q]uarto" },
+  ["<leader>qr"] = { name = "[Q]uarto [R]un" },
+  ["<leader>r"] = { name = "[R] R specific tools" },
+  ["<leader>s"] = { name = "[S]earch(Telescope)" },
+  ["<leader>v"] = { name = "[V]im" },
+  ["<leader>x"] = { name = "E[X]ecute" },
+}, { mode = 'n' })
 
 ------------------------------------------------------------------
 -- LSP keymaps (basic ones that work across all LSP servers)
@@ -186,4 +211,3 @@ nmap("<leader>xx", ":w<cr>:source %<cr>", "Source current file")
 
 -- Return keymap utility functions to make them available to other modules
 return _G.keymap_util
-

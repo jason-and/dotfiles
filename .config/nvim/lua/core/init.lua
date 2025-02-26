@@ -1,14 +1,18 @@
 -- Load core modules in specific order
 local modules = {
-  "options",   -- Basic Vim options
-  "autocmds",  -- Global autocommands
-  "keymaps",   -- Global keymaps
-  "utils"      -- Utility functions
+  "keymaps", -- Global keymaps
+  "options", -- Basic Vim options
+  "autocommands", -- Global autocommands
+  "utils" -- Utility functions
 }
 
 -- Load each module
 for _, module in ipairs(modules) do
-  local ok, err = pcall(require, "core/" .. module)
+  local ok, result = pcall(require, "core." .. module)
+  if not ok then
+    -- If there was an error loading the module, print it
+    vim.notify("Error loading module 'core." .. module .. "': " .. tostring(result), vim.log.levels.ERROR)
+  end
 end
 
 -- Return the module for use in other places
