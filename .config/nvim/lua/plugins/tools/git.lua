@@ -21,73 +21,70 @@ return {
 		end,
 	},
 
-	-- Here is a more advanced example where we pass configuration
-	-- options to `gitsigns.nvim`. This is equivalent to the following Lua:
-	--    require('gitsigns').setup({ ... })
-	--
-	-- See `:help gitsigns` to understand what the configuration keys do
+	-- Git signs in the gutter and enhanced Git commands
 	{
-		{ -- Adds git related signs to the gutter, as well as utilities for managing changes
-			"lewis6991/gitsigns.nvim",
-			opts = {
-				signs = {
-					add = { text = "+" },
-					change = { text = "~" },
-					delete = { text = "_" },
-					topdelete = { text = "‾" },
-					changedelete = { text = "~" },
-				},
-				on_attach = function(bufnr)
-					local gitsigns = require("gitsigns")
-
-					local function map(mode, l, r, opts)
-						opts = opts or {}
-						opts.buffer = bufnr
-						vim.keymap.set(mode, l, r, opts)
-					end
-
-					-- Navigation
-					map("n", "]c", function()
-						if vim.wo.diff then
-							vim.cmd.normal({ "]c", bang = true })
-						else
-							gitsigns.nav_hunk("next")
-						end
-					end, { desc = "Jump to next git [c]hange" })
-
-					map("n", "[c", function()
-						if vim.wo.diff then
-							vim.cmd.normal({ "[c", bang = true })
-						else
-							gitsigns.nav_hunk("prev")
-						end
-					end, { desc = "Jump to previous git [c]hange" })
-
-					--   -- Actions
-					--   -- visual mode
-					--   map('v', '<leader>hs', function()
-					--     gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
-					--   end, { desc = 'git [s]tage hunk' })
-					--   map('v', '<leader>hr', function()
-					--     gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
-					--   end, { desc = 'git [r]eset hunk' })
-					--   -- normal mode
-					--   map('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk' })
-					--   map('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk' })
-					--   map('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer' })
-					--   map('n', '<leader>hu', gitsigns.undo_stage_hunk, { desc = 'git [u]ndo stage hunk' })
-					--   map('n', '<leader>hR', gitsigns.reset_buffer, { desc = 'git [R]eset buffer' })
-					--   map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'git [p]review hunk' })
-					--   map('n', '<leader>hb', gitsigns.blame_line, { desc = 'git [b]lame line' })
-					--   map('n', '<leader>hd', gitsigns.diffthis, { desc = 'git [d]iff against index' })
-					--   map('n', '<leader>hD', function()
-					--     gitsigns.diffthis '@'
-					--   end, { desc = 'git [D]iff against last commit' })
-					--   -- Toggles
-					--   map('n', '<leader>tb', gitsigns.toggle_current_line_blame, { desc = '[T]oggle git show [b]lame line' })
-					--   map('n', '<leader>tD', gitsigns.toggle_deleted, { desc = '[T]oggle git show [D]eleted' })
-				end,
+		"lewis6991/gitsigns.nvim",
+		opts = {
+			signs = {
+				add = { text = "+" },
+				change = { text = "~" },
+				delete = { text = "_" },
+				topdelete = { text = "‾" },
+				changedelete = { text = "~" },
 			},
+			on_attach = function(bufnr)
+				local gitsigns = require("gitsigns")
+
+				local function map(mode, l, r, opts)
+					opts = opts or {}
+					opts.buffer = bufnr
+					vim.keymap.set(mode, l, r, opts)
+				end
+
+				-- Navigation
+				map("n", "]c", function()
+					if vim.wo.diff then
+						vim.cmd.normal({ "]c", bang = true })
+					else
+						gitsigns.nav_hunk("next")
+					end
+				end, { desc = "Jump to next git [c]hange" })
+
+				map("n", "[c", function()
+					if vim.wo.diff then
+						vim.cmd.normal({ "[c", bang = true })
+					else
+						gitsigns.nav_hunk("prev")
+					end
+				end, { desc = "Jump to previous git [c]hange" })
+
+				-- Actions - organize under <leader>g prefix for Git
+				-- Visual mode
+				map("v", "<leader>gs", function()
+					gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+				end, { desc = "Git [s]tage hunk" })
+
+				map("v", "<leader>gr", function()
+					gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+				end, { desc = "Git [r]eset hunk" })
+
+				-- Normal mode
+				map("n", "<leader>gs", gitsigns.stage_hunk, { desc = "Git [s]tage hunk" })
+				map("n", "<leader>gr", gitsigns.reset_hunk, { desc = "Git [r]eset hunk" })
+				map("n", "<leader>gS", gitsigns.stage_buffer, { desc = "Git [S]tage buffer" })
+				map("n", "<leader>gu", gitsigns.undo_stage_hunk, { desc = "Git [u]ndo stage hunk" })
+				map("n", "<leader>gR", gitsigns.reset_buffer, { desc = "Git [R]eset buffer" })
+				map("n", "<leader>gp", gitsigns.preview_hunk, { desc = "Git [p]review hunk" })
+				map("n", "<leader>gb", gitsigns.blame_line, { desc = "Git [b]lame line" })
+				map("n", "<leader>gd", gitsigns.diffthis, { desc = "Git [d]iff against index" })
+				map("n", "<leader>gD", function()
+					gitsigns.diffthis("~")
+				end, { desc = "Git [D]iff against last commit" })
+
+				-- Toggles
+				map("n", "<leader>gtb", gitsigns.toggle_current_line_blame, { desc = "Toggle git show [b]lame line" })
+				map("n", "<leader>gtd", gitsigns.toggle_deleted, { desc = "Toggle git show [d]eleted" })
+			end,
 		},
 	},
 
@@ -100,14 +97,15 @@ return {
 			})
 		end,
 		keys = {
-			{ "<leader>gco", ":GitConflictChooseOurs<cr>" },
-			{ "<leader>gct", ":GitConflictChooseTheirs<cr>" },
-			{ "<leader>gcb", ":GitConflictChooseBoth<cr>" },
-			{ "<leader>gc0", ":GitConflictChooseNone<cr>" },
-			{ "]x", ":GitConflictNextConflict<cr>" },
-			{ "[x", ":GitConflictPrevConflict<cr>" },
+			{ "<leader>gco", ":GitConflictChooseOurs<cr>", desc = "Git conflict: choose [o]urs" },
+			{ "<leader>gct", ":GitConflictChooseTheirs<cr>", desc = "Git conflict: choose [t]heirs" },
+			{ "<leader>gcb", ":GitConflictChooseBoth<cr>", desc = "Git conflict: choose [b]oth" },
+			{ "<leader>gc0", ":GitConflictChooseNone<cr>", desc = "Git conflict: choose [0] none" },
+			{ "]x", ":GitConflictNextConflict<cr>", desc = "Next conflict" },
+			{ "[x", ":GitConflictPrevConflict<cr>", desc = "Previous conflict" },
 		},
 	},
+
 	{
 		"f-person/git-blame.nvim",
 		init = function()
@@ -115,18 +113,22 @@ return {
 				enabled = false,
 			})
 			vim.g.gitblame_display_virtual_text = 1
-			-- vim.g.gitblame_enabled = 0
 		end,
+		keys = {
+			{ "<leader>gbb", ":GitBlameToggle<cr>", desc = "Git blame toggle virtual text" },
+			{ "<leader>gbc", ":GitBlameCopyCommitURL<cr>", desc = "Git blame [c]opy" },
+			{ "<leader>gbo", ":GitBlameOpenCommitURL<cr>", desc = "Git blame [o]pen" },
+		},
 	},
 
-	{ -- github PRs and the like with gh - cli
+	{ -- github PRs and the like with gh-cli
 		"pwntester/octo.nvim",
 		enabled = true,
 		cmd = "Octo",
 		config = function()
 			require("octo").setup()
-			vim.keymap.set("n", "<leader>gpl", ":Octo pr list<cr>", { desc = "octo [p]r list" })
-			vim.keymap.set("n", "<leader>gpr", ":Octo review start<cr>", { desc = "octo [r]eview" })
+			vim.keymap.set("n", "<leader>gpl", ":Octo pr list<cr>", { desc = "Octo [p]r list" })
+			vim.keymap.set("n", "<leader>gpr", ":Octo review start<cr>", { desc = "Octo [r]eview" })
 		end,
 	},
 }

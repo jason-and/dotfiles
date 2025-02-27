@@ -70,16 +70,12 @@ return {
 				{ "<leader>e", group = "[E]dit", mode = { "n" } },
 				{ "<leader>f", group = "[F]ind (Telescope)", mode = { "n" } },
 
-				-- Git operations
-				{ "<leader>g", group = "[G]it", mode = { "n" } },
-				{ "<leader>gb", group = "[G]it [B]lame", mode = { "n" } },
-				{ "<leader>gd", group = "[G]it [D]iff", mode = { "n" } },
-				{ "<leader>gh", group = "[G]it [H]unk", mode = { "n", "v" } },
-
-				-- Help and UI
-				{ "<leader>h", group = "[H]elp", mode = { "n" } },
-				{ "<leader>hc", group = "[H]ide [C]onceal", mode = { "n" } },
-				{ "<leader>ht", group = "[H]elp [T]reesitter", mode = { "n" } },
+				-- Git groups
+				{ "<leader>g", group = "[G]it", mode = { "n", "v" } },
+				{ "<leader>gb", group = "Git [B]lame", mode = { "n" } },
+				{ "<leader>gc", group = "Git [C]onflict", mode = { "n" } },
+				{ "<leader>gd", group = "Git [D]iff", mode = { "n" } },
+				{ "<leader>gt", group = "Git [T]oggle", mode = { "n" } },
 
 				-- Language and LSP
 				{ "<leader>l", group = "[L]anguage/LSP", mode = { "n" } },

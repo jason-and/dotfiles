@@ -1,6 +1,6 @@
 return {
 	"chrishrb/gx.nvim",
-	enabled = true,
+	enabled = false,
 	keys = { { "gx", "<cmd>Browse<cr>", mode = { "n", "x" } } },
 	cmd = { "Browse" },
 	init = function()
@@ -15,4 +15,3 @@ return {
 		},
 	},
 }
-
