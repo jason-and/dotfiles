@@ -52,11 +52,11 @@ end
 
 -- Make utility functions globally available
 _G.keymap_util = {
-  nmap = nmap,
-  vmap = vmap,
-  imap = imap,
-  cmap = cmap,
-  tmap = tmap
+	nmap = nmap,
+	vmap = vmap,
+	imap = imap,
+	cmap = cmap,
+	tmap = tmap,
 }
 
 ------------------------------------------------------------------
@@ -83,11 +83,11 @@ nmap("<up>", '<cmd>echo "Use k to move!!"<CR>', "Disable up arrow")
 nmap("<down>", '<cmd>echo "Use j to move!!"<CR>', "Disable down arrow")
 
 -- Quick save
-imap('<C-s>', '<esc>:update<cr><esc>', "Save file")
-nmap('<C-s>', '<cmd>:update<cr><esc>', "Save file")
+imap("<C-s>", "<esc>:update<cr><esc>", "Save file")
+nmap("<C-s>", "<cmd>:update<cr><esc>", "Save file")
 
 -- Better command line navigation
-cmap('<C-a>', '<Home>', "Go to start of command line")
+cmap("<C-a>", "<Home>", "Go to start of command line")
 
 -- Search centered
 nmap("n", "nzzzv", "Next search result (centered)")
@@ -115,7 +115,6 @@ tmap("<C-h>", [[<Cmd>wincmd h<CR>]], "Move to left split from terminal")
 tmap("<C-j>", [[<Cmd>wincmd j<CR>]], "Move to split below from terminal")
 tmap("<C-k>", [[<Cmd>wincmd k<CR>]], "Move to split above from terminal")
 tmap("<C-l>", [[<Cmd>wincmd l<CR>]], "Move to right split from terminal")
-
 
 ------------------------------------------------------------------
 -- File/code navigation keymaps
@@ -162,16 +161,46 @@ imap("<c-x><c-x>", "<c-x><c-o>", "Trigger omnifunc completion")
 imap("<m-->", " <- ", "R assignment operator")
 imap("<m-m>", " |>", "R pipe operator")
 
-
 ------------------------------------------------------------------
 -- LSP keymaps (basic ones that work across all LSP servers)
 ------------------------------------------------------------------
 
 nmap("<leader>la", vim.lsp.buf.code_action, "LSP code [A]ction")
 nmap("<leader>le", vim.diagnostic.open_float, "Show hover [E]rror")
-nmap("<leader>ldd", function() vim.diagnostic.enable(false) end, "[D]iagnostics [D]isable")
+nmap("<leader>ldd", function()
+	vim.diagnostic.enable(false)
+end, "[D]iagnostics [D]isable")
 nmap("<leader>lde", vim.diagnostic.enable, "[D]iagnostics [E]nable")
 nmap("<c-LeftMouse>", "<cmd>lua vim.lsp.buf.definition()<CR>", "Go to definition")
+
+------------------------------------------------------------------
+-- Code Formatting
+-- ------------------------------------------------------------------
+
+-- Format the current buffer (use <leader>cf for "code format" instead of bf)
+nmap("<leader>cf", function()
+	require("conform").format({ async = true })
+end, "[C]ode [F]ormat buffer")
+
+-- Format the selected text (visual mode)
+vmap("<leader>cf", function()
+	require("conform").format({
+		async = true,
+		lsp_format = "fallback",
+		range = {
+			start = vim.fn.getpos("'<"),
+			["end"] = vim.fn.getpos("'>"),
+		},
+	})
+end, "[C]ode [F]ormat selection")
+
+-- Toggle format on save (<leader>tf for "toggle format")
+nmap("<leader>tf", ":FormatToggle<CR>", "[T]oggle [F]ormat on save")
+
+-- Format with LSP (fallback when conform doesn't have a formatter)
+nmap("<leader>lf", function()
+	vim.lsp.buf.format({ async = true })
+end, "[L]SP [F]ormat")
 
 ------------------------------------------------------------------
 -- Vim-specific commands
@@ -186,4 +215,3 @@ nmap("<leader>xx", ":w<cr>:source %<cr>", "Source current file")
 
 -- Return keymap utility functions to make them available to other modules
 return _G.keymap_util
-

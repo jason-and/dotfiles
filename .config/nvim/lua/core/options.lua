@@ -71,13 +71,6 @@ vim.api.nvim_set_hl(0, 'TermCursor', { fg = '#A6E3A1', bg = '#A6E3A1' }) -- how 
 vim.opt.list = true
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
--- use less indentation
--- tabs & indentation
-vim.opt.tabstop = 2 -- 2 spaces for tabs (prettier default)
-vim.opt.shiftwidth = 2 -- 2 spaces for indent width
-vim.opt.expandtab = true -- expand tab to spaces
-vim.opt.autoindent = true -- copy indent from current line when starting new one
-
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = "split"
 
@@ -120,5 +113,53 @@ vim.diagnostic.config {
   signs = true,
 }
 
+------------------------------------------------
+-- Indentation settings (global defaults)
+------------------------------------------------
+-- Default indentation: 2 spaces
+vim.opt.expandtab = true           -- Use spaces instead of tabs
+vim.opt.shiftwidth = 2             -- Size of an indent
+vim.opt.tabstop = 2                -- Number of spaces tabs count for
+vim.opt.softtabstop = 2            -- Number of spaces when editing
+vim.opt.shiftround = true          -- Round indent to multiple of 'shiftwidth'
+vim.opt.smartindent = true         -- Insert indents automatically
+
+-- Add these after the indentation settings
+-- Create an autocommand group for filetype-specific settings
+local indent_group = vim.api.nvim_create_augroup("IndentationSettings", { clear = true })
+
+-- Define filetype-specific indentation
+vim.api.nvim_create_autocmd("FileType", {
+  group = indent_group,
+  pattern = { "python" },
+  callback = function()
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.tabstop = 4
+    vim.opt_local.softtabstop = 4
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = indent_group,
+  pattern = { "r", "rmd", "quarto" },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.softtabstop = 2
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = indent_group,
+  pattern = { "lua", "html", "css", "javascript", "typescript", "json", "yaml", "sql", "sh", "bash" },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.softtabstop = 2
+  end,
+})
+
+-- When opening a new file, try to use same indent as current file
+vim.g.sleuth_neighbor_limit = 5  -- Look at neighboring files within 5 lines
 
 -- vim: ts=2 sts=2 sw=2 et
