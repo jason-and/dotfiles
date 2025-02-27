@@ -256,15 +256,6 @@ return {
 				end,
 			})
 
-			-- Add to your statusline config
-			local function lsp_status()
-				local bufnr = vim.api.nvim_get_current_buf()
-				if vim.b[bufnr].lsp_active then
-					return "  LSP"
-				end
-				return ""
-			end
-
 			-- LSP servers and clients are able to communicate to each other what features they support.
 			--  By default, Neovim doesn't support everything that is in the LSP specification.
 			--  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
