@@ -8,6 +8,16 @@ vim.opt.formatoptions:remove 'c'
 vim.opt.formatoptions:remove 'r'
 vim.opt.formatoptions:remove 'o'
 
+
+
+vim.api.nvim_create_autocmd('TextYankPost', {
+  desc = 'Highlight when yanking (copying) text',
+  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+})
+
 -- checks if any open files have been modified outside of Neovim
 vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter' }, {
   pattern = { '*' },
