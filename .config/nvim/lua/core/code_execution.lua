@@ -298,12 +298,12 @@ M.mark_terminal = function()
 
 		-- Detect language based on terminal process
 		local term_name = vim.api.nvim_buf_get_name(buf)
-		if term_name:match("R") then
+		if string.match(term_name, "R") then
 			vim.b.quarto_is_r_mode = true
 			vim.notify("Terminal marked for R", vim.log.levels.INFO)
-		elseif term_name:match("python") or term_name:match("ipython") then
+		elseif string.match(term_name, "python") or string.match(term_name, "ipython") then
 			vim.b.quarto_is_r_mode = false
-			vim.g.slime_python_ipython = term_name:match("ipython") and 1 or 0
+			vim.g.slime_python_ipython = string.match(term_name, "ipython") and 1 or 0
 			vim.notify("Terminal marked for Python", vim.log.levels.INFO)
 		else
 			vim.notify("Terminal marked (generic)", vim.log.levels.INFO)
@@ -323,10 +323,10 @@ M.new_terminal = function(lang)
 		M.mark_terminal()
 	end, 500)
 
-	-- Set focus to the terminal
-	vim.cmd("startinsert")
+	-- 	-- Set focus to the terminal
+	-- 	vim.cmd("startinsert")
 end
-
+--
 -- Create terminals for different languages
 M.new_terminal_python = function()
 	M.new_terminal("python")
@@ -342,6 +342,12 @@ M.new_terminal_julia = function()
 end
 M.new_terminal_shell = function()
 	M.new_terminal("$SHELL")
+end
+
+-- Define setup_diagnostics as a separate function
+M.setup_diagnostics = function()
+	-- Register the command to make it accessible
+	vim.api.nvim_create_user_command("CheckSlime", M.check_slime, {})
 end
 
 -- Setup function to be called from the plugin config
@@ -444,10 +450,7 @@ M.check_slime = function()
 	-- Replace nvim_buf_set_option with bo
 	vim.bo[buf].modifiable = false
 	vim.api.nvim_buf_set_name(buf, "Slime Diagnostics")
-	M.setup_diagnostics = function()
-		-- Register the command to make it accessible
-		vim.api.nvim_create_user_command("CheckSlime", M.check_slime, {})
-	end
 end
+
 -- Return the module
 return M
