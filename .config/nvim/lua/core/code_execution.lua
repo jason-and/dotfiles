@@ -277,14 +277,14 @@ end
 -- Mark a terminal buffer for sending code
 M.mark_terminal = function()
 	local buf = vim.api.nvim_get_current_buf()
-	local buftype = vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
+	local buftype = vim.bo[buf].buftype
 
 	if buftype ~= "terminal" then
 		vim.notify("Not a terminal buffer", vim.log.levels.ERROR)
 		return
 	end
 
-	local job_id = vim.b.terminal_job_id
+	local job_id = vim.b[buf].terminal_job_id
 	if job_id then
 		-- Configure slime to use this terminal
 		vim.g.slime_target = "neovim"
