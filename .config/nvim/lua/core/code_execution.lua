@@ -167,29 +167,35 @@ M.send_line_or_selection = function()
 		local start_pos = vim.fn.getpos("'<")
 		local end_pos = vim.fn.getpos("'>")
 
-		-- Ensure we have valid positions
 		if start_pos and end_pos and #start_pos >= 3 and #end_pos >= 3 then
 			local lines =
 				vim.api.nvim_buf_get_text(0, start_pos[2] - 1, start_pos[3] - 1, end_pos[2] - 1, end_pos[3], {})
 
-			-- Make sure lines is actually a table
 			if type(lines) == "table" then
 				local text = table.concat(lines, "\n")
 
-				-- Send the text
-				vim.fn["slime#send"](text .. "\n")
-			else
-				vim.notify("Error: Selected text has unexpected format", vim.log.levels.ERROR)
-			end
-		else
-			vim.notify("Error: Invalid selection positions", vim.log.levels.ERROR)
-		end
+				-- Check if this is Python and we're using IPython
+				local is_python = vim.bo.filetype == "python" or (vim.b.quarto_is_python_chunk or false)
 
+				if is_python and vim.g.slime_python_ipython == 1 then
+					-- Use IPython's cpaste mode
+					vim.fn["slime#send"]("%cpaste -q\n")
+					-- Short pause to ensure cpaste mode is entered
+					vim.defer_fn(function()
+						vim.fn["slime#send"](text .. "\n--\n")
+					end, 100)
+				else
+					-- Regular send for non-Python
+					vim.fn["slime#send"](text .. "\n")
+				end
+			end
+		end
 		-- Return to normal mode
 		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
 		return
-	end -- Handle R piped expressions
+	end
 
+	-- Handle R piped expressions
 	if vim.bo.filetype == "r" or vim.bo.filetype == "quarto" then
 		if M.is_piped_expression() then
 			local range = M.get_piped_expression()
@@ -326,7 +332,7 @@ M.new_terminal_python = function()
 	M.new_terminal("python")
 end
 M.new_terminal_ipython = function()
-	M.new_terminal("ipython --no-confirm-exit")
+	M.new_terminal("ipython --no-autoindent --no-confirm-exit")
 end
 M.new_terminal_r = function()
 	M.new_terminal("R")
@@ -401,7 +407,8 @@ M.check_slime = function()
 	-- List open terminals
 	local terminal_count = 0
 	for _, buf_id in ipairs(vim.api.nvim_list_bufs()) do
-		if vim.api.nvim_buf_get_option(buf_id, "buftype") == "terminal" then
+		-- Replace nvim_buf_get_option with bo
+		if vim.bo[buf_id].buftype == "terminal" then
 			terminal_count = terminal_count + 1
 			local name = vim.api.nvim_buf_get_name(buf_id)
 			local job_id = vim.b[buf_id].terminal_job_id or "unknown"
@@ -430,15 +437,17 @@ M.check_slime = function()
 	vim.cmd(win_height .. "new")
 	local win = vim.api.nvim_get_current_win()
 	vim.api.nvim_win_set_buf(win, buf)
-	vim.api.nvim_win_set_option(win, "wrap", true)
-	vim.api.nvim_buf_set_option(buf, "modifiable", false)
+
+	-- Replace nvim_win_set_option with wo
+	vim.wo[win].wrap = true
+
+	-- Replace nvim_buf_set_option with bo
+	vim.bo[buf].modifiable = false
 	vim.api.nvim_buf_set_name(buf, "Slime Diagnostics")
+	M.setup_diagnostics = function()
+		-- Register the command to make it accessible
+		vim.api.nvim_create_user_command("CheckSlime", M.check_slime, {})
+	end
 end
-
-M.setup_diagnostics = function()
-	-- Register the command to make it accessible
-	vim.api.nvim_create_user_command("CheckSlime", M.check_slime, {})
-end
-
 -- Return the module
 return M
