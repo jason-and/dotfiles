@@ -3,7 +3,8 @@ local modules = {
   "keymaps", -- Global keymaps
   "options", -- Basic Vim options
   "autocommands", -- Global autocommands
-  "utils" -- Utility functions
+  "utils", -- Utility functions
+  "code_execution"
 }
 
 -- Load each module

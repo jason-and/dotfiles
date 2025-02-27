@@ -57,18 +57,19 @@ return {
         },
       },
 
-      -- Document existing key chains
+      -- Document all groups
       spec = {
         -- Development tools
         { "<leader>c", group = "[C]ode / [C]ell / [C]hunk", mode = { 'n', 'x' } },
         { "<leader>d", group = "[D]ebug", mode = { 'n' } },
         { "<leader>dt", group = "[D]ebug [T]est", mode = { 'n' } },
-        
+        {" <leader>s", group = "[S]end code"},
+
         -- File/Buffer operations
         {"<leader>b", group = "[B]uffers" },
         { "<leader>e", group = "[E]dit", mode = { 'n' } },
         { "<leader>f", group = "[F]ind (Telescope)", mode = { 'n' } },
-        
+
          -- Git operations
         { "<leader>g", group = "[G]it", mode = { 'n' } },
         { "<leader>gb", group = "[G]it [B]lame", mode = { 'n' } },
@@ -79,13 +80,11 @@ return {
         -- Help and UI
         { "<leader>h", group = "[H]elp", mode = { 'n' } },
         { "<leader>hc", group = "[H]ide [C]onceal", mode = { 'n' } },
-        {"<leader>u", group = "[U]I Elements" },
-        {"<leader>uc", { group = "[U]I [C]onceal" },           
-        
-        
         { "<leader>ht", group = "[H]elp [T]reesitter", mode = { 'n' } },
-        
-        
+        {"<leader>u", group = "[U]I Elements" },
+        {"<leader>uc", { group = "[U]I [C]onceal" },
+
+
         -- Language and LSP
         { "<leader>l", group = "[L]anguage/LSP", mode = { 'n' } },
         { "<leader>ld", group = "[L]anguage [D]iagnostics", mode = { 'n' } },
@@ -96,7 +95,8 @@ return {
         { "<leader>q", group = "[Q]uarto", mode = { 'n' } },
         { "<leader>qr", group = "[Q]uarto [R]un", mode = { 'n' } },
         { "<leader>r", group = "[R] tools", mode = { 'n' } },
-        
+        { "<leader>p", group = "[P]ython tools"},
+
         -- System and editor
         { '<leader>t', group = '[T]oggle' },
         { "<leader>v", group = "[V]im", mode = { 'n' } },

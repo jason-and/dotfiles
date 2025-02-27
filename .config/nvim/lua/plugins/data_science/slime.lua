@@ -1,109 +1,26 @@
--- Utility functions for slime
-local M = {}
-
--- Check if the current position is in a Python chunk
-M.is_in_python_chunk = function()
-  local is_python = require("otter.tools.functions").is_otter_language_context("python")
-  vim.b.quarto_is_python_chunk = is_python
-  return is_python
-end
-
--- Enhanced version of send_cell that handles Quarto chunks better
-M.send_cell = function()
-  -- Get current buffer info
-  local current_line = vim.fn.line('.')
-  local filetype = vim.bo.filetype
-  
-  -- Special handling for Quarto/RMarkdown documents
-  if filetype == "quarto" or filetype == "markdown" then
-    -- Check if we're inside a code chunk
-    local in_chunk = false
-    local chunk_start = 0
-    local chunk_end = 0
-    local chunk_lang = ""
-    
-    -- Search backwards for chunk start
-    for i = current_line, 1, -1 do
-      local line = vim.fn.getline(i)
-      local chunk_begin = line:match("^%s*```{(.+)}%s*$")
-      if chunk_begin then
-        in_chunk = true
-        chunk_start = i
-        chunk_lang = chunk_begin
-        break
-      end
-    end
-    
-    -- If we found a start, search forward for chunk end
-    if in_chunk then
-      for i = current_line, vim.fn.line('$') do
-        local line = vim.fn.getline(i)
-        if line:match("^%s*```%s*$") then
-          chunk_end = i
-          break
-        end
-      end
-      
-      -- If we found a complete chunk, send only the content (not the markers)
-      if chunk_end > chunk_start then
-        local chunk_content = vim.fn.getline(chunk_start + 1, chunk_end - 1)
-        local text_to_send = table.concat(chunk_content, "\n")
-        
-        -- Set the language context
-        if chunk_lang:match("python") then
-          vim.b.quarto_is_python_chunk = true
-        else
-          vim.b.quarto_is_python_chunk = false
-        end
-        
-        -- Send to terminal
-        vim.fn['slime#send'](text_to_send .. "\n")
-        return
-      end
-    end
-  end
-  
-  -- Fall back to standard cell sending if not in a Quarto chunk
-  vim.fn['slime#send_cell']()
-end
-
--- Setup function for terminal marking and config
-M.setup_terminal = function()
-  local function mark_terminal()
-    local job_id = vim.b.terminal_job_id
-    if job_id then
-      vim.print("Terminal marked! Job ID: " .. job_id)
-    else
-      vim.notify("Error: This buffer doesn't appear to be a terminal", vim.log.levels.ERROR)
-    end
-  end
-
-  local function set_terminal()
-    vim.fn.call("slime#config", {})
-  end
-  
-  -- Set keymaps for terminal management
-  vim.keymap.set("n", "<leader>cm", mark_terminal, { desc = "[m]ark terminal" })
-  vim.keymap.set("n", "<leader>cs", set_terminal, { desc = "[s]et terminal" })
-end
-
--- The actual plugin spec
 return {
   "jpalardy/vim-slime",
   event = { "BufEnter *.py", "BufEnter *.qmd", "BufEnter *.Rmd", "BufEnter *.r", "BufEnter *.R" },
   init = function()
-    -- Expose our utility function globally
-    _G.Quarto_is_in_python_chunk = M.is_in_python_chunk
-    vim.b.quarto_is_python_chunk = false
-    
-    -- Set cell delimiter for standard code cells
+    -- Global slime configuration
+    vim.g.slime_target = "neovim"
+    vim.g.slime_no_mappings = true  -- We'll define our own mappings
+    vim.g.slime_python_ipython = 1  -- Enable IPython special paste mode
     vim.g.slime_cell_delimiter = "# %%"
-    
-    -- Configure slime for Quarto/RMarkdown
+    vim.g.slime_dispatch_ipython_pause = 100
+
+    -- Initialize buffer-local variables
+    vim.b.quarto_is_python_chunk = false
+    vim.b.quarto_is_r_mode = false
+    vim.b.reticulate_running = false
+
+    -- Make our utility functions available to VimL
+    _G.Quarto_is_in_python_chunk = function()
+      return require('core.code_execution').is_in_python_chunk()
+    end
+
+    -- Configure slime for Quarto/Rmd
     vim.cmd([[
-    let g:slime_dispatch_ipython_pause = 100
-    
-    " Function to handle different language chunks
     function! SlimeOverride_EscapeText_quarto(text)
       " First call our detection function
       call v:lua.Quarto_is_in_python_chunk()
@@ -125,28 +42,58 @@ return {
       endif
     endfunction
     ]])
-
-    -- Global slime configuration
-    vim.g.slime_target = "neovim"
-    vim.g.slime_no_mappings = true
-    vim.g.slime_python_ipython = 1
   end,
-  
+
   config = function()
+    -- Load our code execution module
+    local code_exec = require('core.code_execution')
+
     -- Configure the terminal behavior
     vim.g.slime_input_pid = false
     vim.g.slime_suggest_default = true
     vim.g.slime_menu_config = false
     vim.g.slime_neovim_ignore_unlisted = true
-    
-    -- Setup terminal marking functions
-    M.setup_terminal()
-    
-    -- Setup keymaps for sending code
-    vim.keymap.set("n", "<leader><cr>", M.send_cell, {desc = "run code cell"})
-    vim.keymap.set("n", "<c-cr>", M.send_cell)
-    vim.keymap.set("n", "<s-cr>", M.send_cell)
-    vim.keymap.set("i", "<c-cr>", M.send_cell)
-    vim.keymap.set("i", "<s-cr>", M.send_cell)
-  end,
+
+    -- Initialize our code execution module
+    code_exec.setup()
+
+-- Global keymaps for code execution
+-- Send line with Ctrl+Enter (consistent with RStudio behavior)
+vim.keymap.set("n", "<C-Enter>", code_exec.send_line_or_selection, {desc = "Send current line to terminal"})
+vim.keymap.set("i", "<C-Enter>", function() 
+  vim.cmd("normal! <Esc>") 
+  code_exec.send_line_or_selection() 
+  vim.cmd("startinsert! <End>") 
+end, {desc = "Send line to terminal and continue"})
+
+-- Alt+Enter is also mapped to line execution for consistency with RStudio
+vim.keymap.set("n", "<M-Enter>", code_exec.send_line_or_selection, {desc = "Send current line to terminal"})
+vim.keymap.set("v", "<M-Enter>", code_exec.send_line_or_selection, {desc = "Send selection to terminal"})
+
+-- Cell execution with Shift+Enter
+vim.keymap.set("n", "<S-Enter>", code_exec.send_cell, {desc = "Send code cell/chunk"})
+vim.keymap.set("i", "<S-Enter>", function() 
+  vim.cmd("normal! <Esc>")
+  code_exec.send_cell()
+  vim.cmd("startinsert! <End>")
+end, {desc = "Send code cell/chunk and continue"})
+
+-- Additional mappings with leader key
+vim.keymap.set("n", "<leader><cr>", code_exec.send_cell, {desc = "Run code cell/chunk"})
+vim.keymap.set("n", "<leader>sl", code_exec.send_line_or_selection, {desc = "Send current line to terminal"})
+vim.keymap.set("v", "<leader>sl", code_exec.send_line_or_selection, {desc = "Send selection to terminal"}) 
+
+    -- Terminal management keymaps
+vim.keymap.set("n", "<leader>cm", code_exec.mark_terminal, {desc = "[M]ark terminal for code"})
+vim.keymap.set("n", "<leader>ct", function() vim.fn.call("slime#config", {}) end, {desc = "Configure [t]erminal"})
+
+    -- Create new terminal keymaps
+vim.keymap.set("n", "<leader>ci", code_exec.new_terminal_ipython, {desc = "New [i]Python terminal"})
+vim.keymap.set("n", "<leader>cp", code_exec.new_terminal_python, {desc = "New [p]ython terminal"})
+vim.keymap.set("n", "<leader>cr", code_exec.new_terminal_r, {desc = "New [r] terminal"})
+vim.keymap.set("n", "<leader>cj", code_exec.new_terminal_julia, {desc = "New [j]ulia terminal"})
+vim.keymap.set("n", "<leader>cn", code_exec.new_terminal_shell, {desc = "[n]ew shell terminal"})
+end,
 }
+
+
