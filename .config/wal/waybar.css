@@ -1,0 +1,19 @@
+/* Waybar CSS template for Pywal */
+@import url("colors.css");
+
+/* General */
+#waybar {
+  background-color: @bg_color;
+  color: @fg_color;
+}
+
+/* Modules */
+#workspaces button {
+  background-color: @bg_color;
+  color: @fg_color;
+}
+
+#workspaces button.focused {
+  background-color: @bg_color_focus;
+  color: @fg_color_focus;
+}

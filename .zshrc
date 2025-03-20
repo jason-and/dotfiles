@@ -31,25 +31,6 @@ alias pi='ssh pi4@192.168.0.220'
 
 
 # =============================================================================
-# AUTOSTART
-# =============================================================================
-
-# =============================================================================
-# Fastfetch
-# =============================================================================
-# if [[ $(tty) == *"pts"* ]]; then
-#     fastfetch --config examples/13
-# else
-#     echo
-#     if [ -f /bin/qtile ]; then
-#         echo "Start Qtile X11 with command Qtile"
-#     fi
-#     if [ -f /bin/hyprctl ]; then
-#         echo "Start Hyprland with command Hyprland"
-#     fi
-# fi
-#
-# =============================================================================
 # FZF Configuration (Fuzzy Finder)
 # =============================================================================
 # Set up fzf key bindings and fuzzy completion
@@ -64,8 +45,6 @@ export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git
 show_file_or_dir_preview="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
 export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always {}'"
 export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
-
-
 
 
 # Advanced customization of fzf options
@@ -117,6 +96,7 @@ export NVM_DIR="$HOME/.nvm"
 
 # Starship prompt
 eval "$(starship init zsh)"
+
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/andrew/.lmstudio/bin"
