@@ -1,8 +1,6 @@
 ------------------------------------------------------------------
 --- Utilities
 ------------------------------------------------------------------
---vim.g["quarto_is_r_mode"] = nil
---vim.g["reticulate_running"] = false
 
 -- Sets up keymapping functions for each mode
 -- Normal mode mappings
@@ -172,6 +170,21 @@ nmap("<leader>ldd", function()
 end, "[D]iagnostics [D]isable")
 nmap("<leader>lde", vim.diagnostic.enable, "[D]iagnostics [E]nable")
 nmap("<c-LeftMouse>", "<cmd>lua vim.lsp.buf.definition()<CR>", "Go to definition")
+
+------------------------------------------------------------------
+--Terminal Commands
+---------------------------------------------------------------------
+
+-- Quick terminal toggling with ToggleTerm
+nmap("<leader>tt", "<cmd>ToggleTerm direction=horizontal size=15<CR>", "[T]oggle [t]erminal")
+
+-- Global access to your language-specific terminals
+nmap("<leader>ci", require("core.code_execution").new_terminal_ipython, "New [i]Python terminal")
+nmap("<leader>cp", require("core.code_execution").new_terminal_python, "New [p]ython terminal")
+nmap("<leader>cr", require("core.code_execution").new_terminal_r, "New [r] terminal")
+nmap("<leader>cj", require("core.code_execution").new_terminal_julia, "New [j]ulia terminal")
+nmap("<leader>cn", require("core.code_execution").new_terminal_shell, "New shell terminal")
+nmap("<leader>cm", require("core.code_execution").mark_terminal, "[M]ark terminal for code")
 
 ------------------------------------------------------------------
 -- Code Formatting

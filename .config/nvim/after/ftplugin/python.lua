@@ -4,6 +4,23 @@ vim.opt_local.shiftwidth = 4
 vim.opt_local.tabstop = 4
 vim.opt_local.softtabstop = 4
 
+vim.keymap.set("n", "<leader>sq", function()
+	local sql_template = {
+		'con.sql("""',
+		"    SELECT * FROM table",
+		'""")',
+	}
+
+	-- Insert the template at cursor position
+	vim.api.nvim_put(sql_template, "l", true, true)
+
+	-- Position cursor on the SQL query line
+	vim.cmd("normal! k")
+	vim.cmd("normal! ^")
+	-- Go to the first character after "SELECT"
+	vim.cmd("normal! fSl")
+end, { buffer = true, desc = "Insert DuckDB SQL query" })
+
 -- Set cell delimiter for Python files
 vim.b.slime_cell_delimiter = "# %%"
 
@@ -62,3 +79,27 @@ vim.keymap.set("n", "<leader>pd", function()
 	local indent = string.match(line_content, "^%s+") or ""
 	vim.api.nvim_put({ indent .. "breakpoint()" }, "l", true, true)
 end, { buffer = true, desc = "Add breakpoint" })
+
+-- Create a variable explorer for Python
+vim.keymap.set("n", "<leader>ve", function()
+	-- Create a new buffer in a vertical split
+	vim.cmd("vnew")
+	vim.cmd("setlocal buftype=nofile bufhidden=wipe noswapfile nowrap")
+	vim.cmd("file Python-Variables")
+
+	-- Send commands to get variables
+	vim.fn["slime#send"]("import pandas as pd\n")
+	vim.fn["slime#send"]("for var_name in dir():\n")
+	vim.fn["slime#send"]("    if not var_name.startswith('_') and var_name not in ['In', 'Out', 'exit', 'quit']:\n")
+	vim.fn["slime#send"]("        var = globals()[var_name]\n")
+	vim.fn["slime#send"]("        var_type = type(var).__name__\n")
+	vim.fn["slime#send"]("        if var_type == 'DataFrame':\n")
+	vim.fn["slime#send"]("            print(f'{var_name}: DataFrame {var.shape}')\n")
+	vim.fn["slime#send"]("        elif var_type == 'ndarray':\n")
+	vim.fn["slime#send"]("            print(f'{var_name}: ndarray {var.shape} {var.dtype}')\n")
+	vim.fn["slime#send"]("        else:\n")
+	vim.fn["slime#send"]("            print(f'{var_name}: {var_type}')\n")
+
+	-- Focus back on the original window
+	vim.cmd("wincmd p")
+end, { buffer = true, desc = "Variable [E]xplorer" })

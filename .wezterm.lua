@@ -11,13 +11,13 @@ end
 -- config
 config.enable_wayland = true
 --- Appearance
-config.color_scheme = 'Kanagawa (Gogh)'
+config.color_scheme = "Kanagawa (Gogh)"
 
 -- fonts
 config.font_size = 13
 config.line_height = 1.2
 config.harfbuzz_features = { "zero" }
-config.font = wezterm.font 'CommitMono Nerdfont'
+config.font = wezterm.font("CommitMono Nerdfont")
 
 ----window
 config.window_close_confirmation = "NeverPrompt"
@@ -39,7 +39,8 @@ config.inactive_pane_hsb = {
 -- SIZE of window:
 config.initial_rows = 54
 config.initial_cols = 220
-config.window_decorations = "RESIZE"
+--config.window_decorations = "RESIZE"
+config.window_decorations = "NONE"
 config.scrollback_lines = 3000
 
 ---Cursor
@@ -83,7 +84,6 @@ config.keys = {
 	-- Lastly, workspace
 	{ key = "w", mods = "LEADER", action = act.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }) },
 }
-
 
 wezterm.on("update-status", function(window, pane)
 	-- Workspace name

@@ -1,0 +1,9 @@
+options(radian.color_scheme = "github-dark")
+
+options(radian.editing_mode = "vi")
+
+options(radian.emacs_bindings_in_vi_insert_mode = FALSE)
+
+options(radian.show_vi_mode_prompt = TRUE)
+options(radian.vi_mode_prompt = "\033[0;34m[{}]\033[0m ")
+

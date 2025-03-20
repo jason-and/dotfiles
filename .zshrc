@@ -25,7 +25,7 @@ alias cat='bat'
 alias ls="eza --color=always --long -G --git -a -m --group-directories-first  --icons=always --no-time --no-user --no-permissions"
 alias reload-zsh="source ~/.zshrc"
 alias zshconfig="nvim ~/.zshrc"
-alias r="radian"
+alias R="radian"
 alias copy="wl-copy"
 alias pi='ssh pi4@192.168.0.220'
 
@@ -108,18 +108,6 @@ alias cd="z"
 # =============================================================================
 # Package Managers and Tools
 # =============================================================================
-# Conda initialization
-__conda_setup="$('/home/andrew/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/andrew/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/andrew/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/andrew/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
 
 # NVM configuration
 export NVM_DIR="$HOME/.nvm"
@@ -132,3 +120,4 @@ eval "$(starship init zsh)"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/andrew/.lmstudio/bin"
+export PATH="/home/andrew/.pixi/bin:$PATH"

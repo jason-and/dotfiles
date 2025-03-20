@@ -163,34 +163,27 @@ M.send_line_or_selection = function()
 
 	-- Handle visual mode
 	if mode == "v" or mode == "V" or mode:find("\22") then
-		-- Get selected text
-		local start_pos = vim.fn.getpos("'<")
-		local end_pos = vim.fn.getpos("'>")
+		-- Use Vim's built-in function to get visual selection
+		vim.cmd('noautocmd normal! "vy"')
+		local text = vim.fn.getreg("v")
 
-		if start_pos and end_pos and #start_pos >= 3 and #end_pos >= 3 then
-			local lines =
-				vim.api.nvim_buf_get_text(0, start_pos[2] - 1, start_pos[3] - 1, end_pos[2] - 1, end_pos[3], {})
-
-			if type(lines) == "table" then
-				local text = table.concat(lines, "\n")
-
-				-- Check if this is Python and we're using IPython
-				local is_python = vim.bo.filetype == "python" or (vim.b.quarto_is_python_chunk or false)
-
-				if is_python and vim.g.slime_python_ipython == 1 then
-					-- Use IPython's cpaste mode
-					vim.fn["slime#send"]("%cpaste -q\n")
-					-- Short pause to ensure cpaste mode is entered
-					vim.defer_fn(function()
-						vim.fn["slime#send"](text .. "\n--\n")
-					end, 100)
-				else
-					-- Regular send for non-Python
-					vim.fn["slime#send"](text .. "\n")
-				end
+		if text and text ~= "" then
+			-- Send to terminal with appropriate mode
+			if
+				vim.bo.filetype == "python"
+				or (vim.b.quarto_is_python_chunk or false) and vim.g.slime_python_ipython == 1
+			then
+				vim.fn["slime#send"]("%cpaste -q\n")
+				vim.defer_fn(function()
+					vim.fn["slime#send"](text .. "\n--\n")
+				end, 100)
+			else
+				vim.fn["slime#send"](text .. "\n")
 			end
 		end
-		-- Return to normal mode
+
+		-- Return to normal mode and clear the temporary register
+		vim.fn.setreg("v", "")
 		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
 		return
 	end
@@ -335,7 +328,7 @@ M.new_terminal_ipython = function()
 	M.new_terminal("ipython --no-autoindent --no-confirm-exit")
 end
 M.new_terminal_r = function()
-	M.new_terminal("R")
+	M.new_terminal("radian")
 end
 M.new_terminal_julia = function()
 	M.new_terminal("julia")
