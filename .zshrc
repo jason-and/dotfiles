@@ -3,6 +3,7 @@
 # =============================================================================
 export STARSHIP_CONFIG=~/.starship.toml
 export EDITOR=nvim
+export BROWSER=zen-browser
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 export FPATH="/usr/bin/eza/completions/zsh:$FPATH"
 
@@ -28,6 +29,7 @@ alias zshconfig="nvim ~/.zshrc"
 alias R="radian"
 alias copy="wl-copy"
 alias pi='ssh pi4@192.168.0.220'
+alias vim='nvim'
 
 
 # =============================================================================

@@ -45,7 +45,37 @@ button:hover {
   background: inherit;
   box-shadow: inset 0 -3px #ffffff;
 }
+#custom-optimus {
+  padding: 0 10px;
+  margin: 0 4px;
+  border-radius: 6px;
+  font-weight: bold;
+}
 
+#custom-optimus.intel {
+  background-color: #0071c5;
+  color: white;
+}
+
+#custom-optimus.nvidia {
+  background-color: #76b900;
+  color: black;
+}
+
+#custom-optimus.hybrid {
+  background-color: #7851a9;
+  color: white;
+}
+
+#custom-optimus.error {
+  background-color: #f53c3c;
+  color: white;
+}
+
+#custom-optimus.unknown {
+  background-color: #888888;
+  color: white;
+}
 /* you can set a style on hover for any module like this */
 #pulseaudio:hover {
   background-color: @color4;
