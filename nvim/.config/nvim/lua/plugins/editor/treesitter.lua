@@ -8,10 +8,13 @@ return {
 			ensure_installed = {
 				"bash",
 				"c",
-        "css",
+				"css",
 				"diff",
 				"html",
-        "javascript",
+				"hyprls",
+				"json",
+				"jsonc",
+				"javascript",
 				"lua",
 				"luadoc",
 				"markdown",
@@ -19,9 +22,12 @@ return {
 				"python",
 				"query",
 				"r",
-        "sql",
+				"rasi",
+				"sql",
+				"toml",
 				"vim",
 				"vimdoc",
+				"xml",
 				"yaml",
 			},
 			-- Autoinstall languages that are not installed
@@ -35,6 +41,18 @@ return {
 			},
 			indent = { enable = true, disable = { "ruby" } },
 		},
+		config = function(_, opts)
+			vim.filetype.add({
+				extension = { rasi = "rasi" },
+				pattern = {
+					[".*/waybar/config"] = "jsonc",
+					[".*/mako/config"] = "dosini",
+					[".*/kitty/*.conf"] = "bash",
+					[".*/hypr/.*%.conf"] = "hyprls",
+				},
+			})
+		end,
+
 		-- There are additional nvim-treesitter modules that you can use to interact
 		-- with nvim-treesitter. You should go explore a few and see what interests you:
 		--
