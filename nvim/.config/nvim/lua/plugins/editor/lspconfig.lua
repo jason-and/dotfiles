@@ -287,6 +287,14 @@ return {
 							or vim.fn.getcwd() -- Fallback to current working directory
 					end,
 				},
+				jsonls = {
+					settings = {
+						json = {
+							schemas = require("schemastore").json.schemas(),
+							validate = { enable = true },
+						},
+					},
+				},
 				-- ... rest of your servers
 				-- rust_analyzer = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs

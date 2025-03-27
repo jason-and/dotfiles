@@ -30,6 +30,8 @@ alias R="radian"
 alias copy="wl-copy"
 alias pi='ssh pi4@192.168.0.220'
 alias vim='nvim'
+# alias cp='cp -i -v'
+# alias mv='mv -i -v'
 
 
 # =============================================================================
@@ -103,3 +105,7 @@ eval "$(starship init zsh)"
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/andrew/.lmstudio/bin"
 export PATH="/home/andrew/.pixi/bin:$PATH"
+
+#vim motions in terminal
+bindkey -v
+

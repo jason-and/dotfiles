@@ -12,11 +12,11 @@
     "idle_inhibitor",
     "pulseaudio",
     "bluetooth",
+    "tray",
     "network",
     "power-profiles-daemon",
     "custom/optimus",
     "battery",
-    "battery#bat2",
   ],
   // Modules configuration
   "hyprland/workspaces": {
@@ -52,17 +52,17 @@
     },
   },
   "tray": {
-    // "icon-size": 21,
+    "icon-size": 16,
     "spacing": 10,
+    "show-passive-items": true,
   },
   "clock": {
-    // "timezone": "America/New_York",
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "format": "{:%H:%M}",
     "format-alt": "{:%Y-%m-%d}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "today-format": "<span color='#ff6699'><b>{}</b></span>",
   },
-  "battery#bat2": {
-    "bat": "BAT2",
-  },
+
   "custom/optimus": {
     "format": "{}",
     "return-type": "json",
@@ -79,41 +79,39 @@
     "format-icons": {
       "default": "",
       "performance": "",
-      "balanced": "",
-      "power-saver": "",
+      "balanced": "  ",
+      "power-saver": " ",
     },
   },
+
   "network": {
-    // "interface": "wlp2*", // (Optional) To force the use of this interface
-    "format-wifi": "{essid} ({signalStrength}%) ",
-    "format-ethernet": "{ipaddr}/{cidr} ",
-    "tooltip-format": "{ifname} via {gwaddr} ",
-    "format-linked": "{ifname} (No IP) ",
-    "format-disconnected": "Disconnected ⚠",
-    "format-alt": "{ifname}: {ipaddr}/{cidr}",
+    "format-wifi": "  {essid}",
+    "format-ethernet": "󰈀 {ipaddr}",
+    "format-linked": "󰈀 {ifname} (No IP)",
+    "format-disconnected": "󰖪 Disconnected",
+    "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
+    "on-click": "nm-connection-editor",
   },
 
   "pulseaudio": {
-    "format": "{icon}   {volume}%",
-    "tooltip": false,
-    "format-muted": " Muted",
-    "on-click": "pavucontrol",
+    "format": "{icon} {volume}%",
+    "format-muted": "󰝟 Muted",
     "format-icons": {
-      "headphone": "",
-      "hands-free": "",
-      "headset": "",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": ["", "", ""],
+      "default": ["", "", ""],
     },
+    "on-click": "pavucontrol",
+    "tooltip": true,
+    "tooltip-format": "{desc} - {volume}%",
   },
+
   "bluetooth": {
-    "format": " {status}",
-    "format-disabled": "", // an empty format will hide the module
-    "format-connected": " {num_connections}",
-    "tooltip-format": "{device_alias}",
-    "tooltip-format-connected": " {device_enumerate}",
-    "tooltip-format-enumerate-connected": "{device_alias}",
+    "format": " {status}",
+    "format-connected": " {device_alias}",
+    "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+    "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+    "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
+    "on-click": "blueman-manager",
   },
 }

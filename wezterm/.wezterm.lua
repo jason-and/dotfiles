@@ -15,7 +15,7 @@ config.color_scheme = "Kanagawa (Gogh)"
 
 -- fonts
 config.font_size = 13
-config.line_height = 1.2
+config.line_height = 1
 config.harfbuzz_features = { "zero" }
 config.font = wezterm.font_with_fallback({ "CommitMono Nerdfont", "Noto Color Emoj" })
 

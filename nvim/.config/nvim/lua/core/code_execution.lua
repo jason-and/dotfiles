@@ -325,7 +325,7 @@ M.new_terminal_python = function()
 	M.new_terminal("python")
 end
 M.new_terminal_ipython = function()
-	M.new_terminal("ipython --no-autoindent --no-confirm-exit")
+	M.new_terminal("uv run ipython --no-autoindent --no-confirm-exit")
 end
 M.new_terminal_r = function()
 	M.new_terminal("radian")
