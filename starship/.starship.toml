@@ -12,10 +12,20 @@ $username\
 $hostname\
 $directory\
 $conda\
+$direnv\
+$env_var\
+$rust\
+$lua\
+$c\
+$cmake\
+$rlang\
+$sudo\
+$quarto\
 $git_branch\
 $git_state\
 $git_status\
 $cmd_duration\
+$shell\
 $character"""
 
 [line_break]

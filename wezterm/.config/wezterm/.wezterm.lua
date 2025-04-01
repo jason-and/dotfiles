@@ -1,6 +1,6 @@
 -- pull in the wezterm API
 local wezterm = require("wezterm")
-local act = wezterm.action
+local act = wezterm.action -- helps binds keys to actions
 
 -- this will hold the configuration
 local config = wezterm.config_builder()
@@ -18,6 +18,8 @@ config.font_size = 13
 config.line_height = 1
 config.harfbuzz_features = { "zero" }
 config.font = wezterm.font_with_fallback({ "CommitMono Nerdfont", "Noto Color Emoj" })
+config.adjust_window_size_when_changing_font_size = false
+config.use_dead_keys = false
 
 ----window
 config.window_close_confirmation = "NeverPrompt"
@@ -41,7 +43,7 @@ config.initial_rows = 54
 config.initial_cols = 220
 --config.window_decorations = "RESIZE"
 config.window_decorations = "NONE"
-config.scrollback_lines = 3000
+config.scrollback_lines = 5000
 
 ---Cursor
 config.default_cursor_style = "BlinkingBlock"
@@ -59,31 +61,92 @@ config.keys = {
 	{ key = "c", mods = "LEADER", action = act.ActivateCopyMode },
 
 	-- Pane keybindings
-	{ key = "-", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-	-- SHIFT is for when caps lock is on
-	{ key = "|", mods = "LEADER|SHIFT", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+	--
+	{ key = '"', mods = "CTRL|SHIFT|ALT", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
+	{ key = "%", mods = "CTRL|SHIFT|ALT", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 	{ key = "h", mods = "LEADER", action = act.ActivatePaneDirection("Left") },
 	{ key = "j", mods = "LEADER", action = act.ActivatePaneDirection("Down") },
 	{ key = "k", mods = "LEADER", action = act.ActivatePaneDirection("Up") },
 	{ key = "l", mods = "LEADER", action = act.ActivatePaneDirection("Right") },
-	{ key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = true }) },
-	{ key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
+	{ key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = false }) },
 	{ key = "s", mods = "LEADER", action = act.RotatePanes("Clockwise") },
-	-- We can make separate keybindings for resizing panes
-	-- But Wezterm offers custom "mode" in the name of "KeyTable"
-	{ key = "r", mods = "LEADER", action = act.ActivateKeyTable({ name = "resize_pane", one_shot = false }) },
+	{ key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
 
 	-- Tab keybindings
-	{ key = "n", mods = "LEADER", action = act.SpawnTab("CurrentPaneDomain") },
-	{ key = "[", mods = "LEADER", action = act.ActivateTabRelative(-1) },
-	{ key = "]", mods = "LEADER", action = act.ActivateTabRelative(1) },
-	{ key = "t", mods = "LEADER", action = act.ShowTabNavigator },
-	-- Key table for moving tabs around
-	{ key = "m", mods = "LEADER", action = act.ActivateKeyTable({ name = "move_tab", one_shot = false }) },
+	{ key = "t", mods = "CTRL", action = act.SpawnTab("CurrentPaneDomain") },
+	{ key = "l", mods = "CTRL|SHIFT", action = act.ActivateTabRelative(1) },
+	{ key = "h", mods = "CTRL|SHIFT", action = act.ActivateTabRelative(-1) },
+	{ key = "q", mods = "CTRL", action = act.CloseCurrentTab({ confirm = false }) },
+	{ key = "Tab", mods = "CTRL", action = act.ShowTabNavigator },
 
-	-- Lastly, workspace
+	-- switch workspaces
 	{ key = "w", mods = "LEADER", action = act.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }) },
+
+	----------------------------------------------------------
+	--- WORKSPACES
+	---------------------------------------------------------
+	-- Switch to the default workspace
+	{
+		key = "y",
+		mods = "CTRL|SHIFT",
+		action = act.SwitchToWorkspace({
+			name = "default",
+		}),
+	},
+	-- Switch to a monitoring workspace, which will have `top` launched into it
+	{
+		key = "u",
+		mods = "CTRL|SHIFT",
+		action = act.SwitchToWorkspace({
+			name = "monitoring",
+			spawn = {
+				args = { "btop" },
+			},
+		}),
+	},
+	-- Create a new workspace with a random name and switch to it
+	{ key = "i", mods = "CTRL|SHIFT", action = act.SwitchToWorkspace },
+
+	-- Prompt for a name to use for a new workspace and switch to it.
+	{
+		key = "W",
+		mods = "CTRL|SHIFT",
+		action = act.PromptInputLine({
+			description = wezterm.format({
+				{ Attribute = { Intensity = "Bold" } },
+				{ Foreground = { AnsiColor = "Fuchsia" } },
+				{ Text = "Enter name for new workspace" },
+			}),
+			action = wezterm.action_callback(function(window, pane, line)
+				-- line will be `nil` if they hit escape without entering anything
+				-- An empty string if they just hit enter
+				-- Or the actual line of text they wrote
+				if line then
+					window:perform_action(
+						act.SwitchToWorkspace({
+							name = line,
+						}),
+						pane
+					)
+				end
+			end),
+		}),
+	},
+
+	-- Show the launcher in fuzzy selection mode and have it list all workspaces
+	-- and allow activating one.
+	{
+		key = "9",
+		mods = "ALT",
+		action = act.ShowLauncherArgs({
+			flags = "FUZZY|WORKSPACES",
+		}),
+	},
 }
+
+----------------------------------------------------------
+--- Tab Bar Additions
+---------------------------------------------------------
 
 wezterm.on("update-status", function(window, pane)
 	-- Workspace name
@@ -101,7 +164,6 @@ wezterm.on("update-status", function(window, pane)
 	end
 
 	local basename = function(s)
-		-- Nothing a little regex can't fix
 		return string.gsub(s, "(.*[/\\])(.*)", "%2")
 	end
 

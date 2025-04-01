@@ -33,6 +33,7 @@
       "3": [],
       "4": [],
       "5": [],
+      "6": [],
     },
   },
   "wlr/taskbar": {
@@ -96,6 +97,8 @@
   "pulseaudio": {
     "format": "{icon} {volume}%",
     "format-muted": "󰝟 Muted",
+    "format-bluetooth": "{volume}% {icon} {format_source}",
+    "format-bluetooth-muted": " {icon} {format_source}",
     "format-icons": {
       "default": ["", "", ""],
     },

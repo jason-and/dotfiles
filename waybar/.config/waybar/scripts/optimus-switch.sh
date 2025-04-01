@@ -15,7 +15,7 @@ if [[ $CONFIRM == "Yes" ]]; then
 
   if [[ $LOGOUT == "Yes" ]]; then
     # Use the appropriate logout command for your environment
-    uwsm stop
+    loginctl terminate-user ""
   else
     notify-send "Optimus Manager" "Remember to log out to apply changes"
   fi

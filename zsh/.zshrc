@@ -30,10 +30,25 @@ alias R="radian"
 alias copy="wl-copy"
 alias pi='ssh pi4@192.168.0.220'
 alias vim='nvim'
-# alias cp='cp -i -v'
-# alias mv='mv -i -v'
+alias cp='cp -i -v'
+alias mv='mv -i -v'
+alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
 
-
+# -----------------------------------------------------
+# Git
+# -----------------------------------------------------
+alias gs="git status"
+alias ga="git add"
+alias gc="git commit -m"
+alias git merge="git merge --no-ff"
+# alias gp="git push"
+# alias gpl="git pull"
+# alias gst="git stash"
+# alias gsp="git stash; git pull"
+# alias gfo="git fetch origin"
+# alias gcheck="git checkout"
+# alias gcredential="git config credential.helper store"
+#
 # =============================================================================
 # FZF Configuration (Fuzzy Finder)
 # =============================================================================
@@ -70,6 +85,20 @@ _fzf_compgen_path() {
 
 _fzf_compgen_dir() {
   fd --type=d --hidden --exclude .git . "$1"
+}
+
+
+# =============================================================================
+# Yazi
+# =============================================================================
+
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
 }
 
 # =============================================================================
