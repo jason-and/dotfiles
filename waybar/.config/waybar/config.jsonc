@@ -17,6 +17,7 @@
     "power-profiles-daemon",
     "custom/optimus",
     "battery",
+    "custom/power",
   ],
   // Modules configuration
   "hyprland/workspaces": {
@@ -116,5 +117,11 @@
     "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
     "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
     "on-click": "blueman-manager",
+  },
+
+  "custom/power": {
+    "format": "⏻",
+    "on-click": "~/.config/rofi/power-menu.sh",
+    "tooltip": false,
   },
 }
