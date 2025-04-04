@@ -13,7 +13,7 @@ case $selected in
     systemctl suspend
     ;;
   Hibernate)
-    systemctl suspend
+    systemctl hibernate
     ;;
   Shutdown)
     systemctl shutdown -h now

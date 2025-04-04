@@ -1,0 +1,11 @@
+[Unit]
+Description=Hyprland Monitor Setup
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/hypr/scripts/monitor_setup.sh
+
+[Install]
+WantedBy=graphical-session.target
