@@ -8,6 +8,16 @@ return {
 	},
 
 	{
+		"S-Spektrum-M/odyssey.nvim",
+		lazy = false,
+		config = function()
+			vim.cmd("colorscheme odyssey")
+		end,
+	},
+
+	{ "EdenEast/nightfox.nvim" }, -- lazy
+
+	{
 		"thesimonho/kanagawa-paper.nvim",
 		lazy = false,
 		priority = 500,

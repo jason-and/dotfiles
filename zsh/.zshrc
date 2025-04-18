@@ -2,7 +2,7 @@
 # Environment Variables
 # =============================================================================
 export STARSHIP_CONFIG=~/.starship.toml
-export EDITOR=nvim
+export EDITOR=emacsclient
 export BROWSER=zen-browser
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 export FPATH="/usr/bin/eza/completions/zsh:$FPATH"
@@ -25,7 +25,7 @@ alias grep='grep -n --color'
 alias cat='bat'
 alias ls="eza --color=always --long -G --git -a -m --group-directories-first  --icons=always --no-time --no-user --no-permissions"
 alias reload-zsh="source ~/.zshrc"
-alias zshconfig="nvim ~/.zshrc"
+alias zshconfig="emacsclient -c ~/.zshrc"
 alias R="radian"
 alias copy="wl-copy"
 alias pi='ssh pi4@192.168.0.220'
