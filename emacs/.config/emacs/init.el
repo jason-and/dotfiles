@@ -44,13 +44,13 @@
                (display-buffer-no-window)
                (allow-no-window . t)))
 
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
 ;; -------------------------------------------------------------------------
 ;; Core System Settings
 ;; -------------------------------------------------------------------------
 
 ;;start server for emacs client
-(server-start)
+;;(server-start)
 
 ;;short answers
 (setq use-short-answers t)

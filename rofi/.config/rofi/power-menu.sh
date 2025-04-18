@@ -6,6 +6,9 @@ options="Logout\nSuspend\nHibernate\nShutdown"
 selected=$(echo -e $options | rofi -dmenu -i -p "Power Menu")
 
 case $selected in
+  reboot)
+    reboot
+    ;;
   Logout)
     uwsm exit
     ;;
