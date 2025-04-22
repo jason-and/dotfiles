@@ -78,14 +78,6 @@
   (setq gcmh-idle-delay 5
         gcmh-high-cons-threshold (* 16 1024 1024))) ;; 16MB
 
-;; More comprehensive escape key behavior
-(use-package evil-escape
-  :init
-  (evil-escape-mode)
-  :config
-  (setq-default evil-escape-key-sequence "jk")
-  (setq-default evil-escape-delay 0.2))
-
 ; -------------------------------------------------------------------------
 ;; Core UI Configuration
 ;; -------------------------------------------------------------------------
@@ -163,21 +155,26 @@
 ;; -------------------------------------------------------------------------
 
 (use-package evil
+  :ensure t
   :init
-  (setq evil-want-integration t)
+  (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  (setq evil-respect-visual-line-mode t)
-  (setq evil-undo-system 'undo-redo)
   :config
   (evil-mode 1))
 
-;; Enhanced evil keybindings for many Emacs modes
 (use-package evil-collection
   :after evil
+  :ensure t
   :config
   (evil-collection-init))
+
+;; More comprehensive escape key behavior
+(use-package evil-escape
+  :init
+  (evil-escape-mode)
+  :config
+  (setq-default evil-escape-key-sequence "jk")
+  (setq-default evil-escape-delay 0.2))
 
 ;; -------------------------------------------------------------------------
 ;; Key Bindings and Command Discovery
@@ -238,13 +235,15 @@
 
 (use-package corfu
   :ensure t
-  :hook (after-init . global-corfu-mode)
+  :init (global-corfu-mode)
   :bind (:map corfu-map ("<tab>" . corfu-complete))
-  :config
-  (setq tab-always-indent 'complete)
-  (setq corfu-preview-current nil)
-  (setq corfu-min-width 20)
-
+  :custom
+  (tab-always-indent 'complete)
+  (corfu-preview-current nil)
+  (corfu-min-width 20)
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+  (corfu-cycle t)
   (setq corfu-popupinfo-delay '(1.25 . 0.5))
   (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
 
@@ -252,10 +251,12 @@
   (with-eval-after-load 'savehist
     (corfu-history-mode 1)
     (add-to-list 'savehist-additional-variables 'corfu-history)))
-
 ;; -------------------------------------------------------------------------
 ;; Development Tools & Features
 ;; -------------------------------------------------------------------------
+
+(use-package vterm
+  :ensure t)
 
 ;; Git integration
 (use-package magit
@@ -293,6 +294,13 @@
 ;; Programming Language Support
 ;; -------------------------------------------------------------------------
 
+(use-package treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
 ;; Python
 (use-package python
   :mode ("\\.py\\'" . python-mode)
@@ -305,9 +313,11 @@
 
 ;; R support
 (use-package ess
-  :defer t
   :init
-  (require 'ess-site))
+  (require 'ess-site)
+  :config
+  ;; Optional: Add command line arguments if needed
+  (setq inferior-R-args "--no-save --no-restore-data --quiet"))
 
 ;; Web development
 (use-package web-mode
