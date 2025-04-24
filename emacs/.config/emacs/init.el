@@ -538,7 +538,6 @@ The DWIM behaviour of this command is as follows:
 
 
 (use-package denote
-  :defer t
   :custom
   (denote-sort-keywords t)
   (denote-link-description-function #'ews-denote-link-description-title-case)
