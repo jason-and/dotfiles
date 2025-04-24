@@ -38,12 +38,6 @@
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 
-(use-package use-package
-  :custom
-  (use-package-always-ensure t)
-  (package-native-compile t)
-  (warning-minimum-level :emergency))
-
 ;; stop warnings when installing packages
 (add-to-list 'display-buffer-alist
              '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
@@ -60,6 +54,10 @@
 
 ;;short answers
 (setq use-short-answers t)
+
+;; Bind key for customising variables
+
+(keymap-global-set "C-c w v" 'customize-variable)
 
 ;;prompt for kill emacs
 (setq confirm-kill-emacs 'yes-or-no-p)
@@ -83,6 +81,24 @@
   :config
   (setq gcmh-idle-delay 5
         gcmh-high-cons-threshold (* 16 1024 1024))) ;; 16MB
+
+(load-file (concat (file-name-as-directory user-emacs-directory)
+		   "ews.el"))
+
+(ews-missing-executables
+ '(("gs" "mutool")
+   "pdftotext"
+   "soffice"
+   "zip"
+   "ddjvu"
+   "curl"
+   ("mpg321" "ogg123" "mplayer" "mpv" "vlc") 
+   ("grep" "ripgrep")
+   ("convert" "gm")
+   "dvipng"
+   "latex"
+   "hunspell"
+   "git"))
 
 ; -------------------------------------------------------------------------
 ;; Core UI Configuration
@@ -112,6 +128,16 @@
       use-dialog-box nil)       ; no dialog boxes
 
 
+;; Window management
+;; Split windows sensibly
+
+(setq split-width-threshold 120
+      split-height-threshold nil)
+
+(use-package balanced-windows
+  :config
+  (balanced-windows-mode))
+
 ;; Enhanced mode line
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
@@ -133,6 +159,12 @@
   (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
   (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
 
+(when (display-graphic-p)
+  (context-menu-mode))
+
+(use-package mixed-pitch
+  :hook
+  (org-mode . mixed-pitch-mode))
 
 ;;themes
 
@@ -305,6 +337,12 @@
   (add-to-list 'eglot-server-programs '(r-mode . ("R" "--slave" "-e" "languageserver::run()")))
   (add-to-list 'eglot-server-programs '(web-mode . ("vscode-html-language-server" "--stdio"))))
 
+;; Configure R formatting style
+(setq-default eglot-workspace-configuration
+              '((r . ((style.spacing . 1)    ;; Number of spaces around operators
+                      (style.indentation . 2) ;; Indentation size
+                      (lsp.diagnostics . t)   ;; Keep diagnostics (linting)
+                      (lsp.formatting . t))))) ;; Keep formatting enabled
 ;; Snippets
 (use-package yasnippet
   :init (yas-global-mode 1))
@@ -340,6 +378,10 @@
   :config
   ;; Optional: Add command line arguments if needed
   (setq inferior-R-args "--no-save --no-restore-data --quiet"))
+
+(use-package ess-view-data
+  :after ess
+(require 'ess-view-data))
 
 ;; Web development
 (use-package web-mode
@@ -394,6 +436,17 @@
 ;;; General Settings
 ;; -------------------------------------------------------------------------
 
+(use-package text-mode
+  :ensure
+  nil
+  :hook
+  (text-mode . visual-line-mode)
+  :init
+  (delete-selection-mode t)
+  :custom
+  (sentence-end-double-space nil)
+  (scroll-error-top-bottom t)
+  (save-interprogram-paste-before-kill t))
 
 ;;recent files
 (recentf-mode 1)
@@ -478,5 +531,130 @@ The DWIM behaviour of this command is as follows:
   (setq trashed-use-header-line t)
   (setq trashed-sort-key '("Date deleted" . t))
   (setq trashed-date-format "%Y-%m-%d %H:%M:%S"))
+
+;; -------------------------------------------------------------------------
+;;; Denote
+;; -------------------------------------------------------------------------
+
+
+(use-package denote
+  :defer t
+  :custom
+  (denote-sort-keywords t)
+  (denote-link-description-function #'ews-denote-link-description-title-case)
+  :hook
+  (dired-mode . denote-dired-mode)
+  :custom-face
+  (denote-faces-link ((t (:slant italic))))
+  :bind
+  (("C-c w d b" . denote-find-backlink)
+   ("C-c w d d" . denote-date)
+   ("C-c w d l" . denote-find-link)
+   ("C-c w d i" . denote-link-or-create)
+   ("C-c w d k" . denote-rename-file-keywords)
+   ("C-c w d n" . denote)
+   ("C-c w d r" . denote-rename-file)
+   ("C-c w d R" . denote-rename-file-using-front-matter)))
+
+(use-package denote-org
+  :bind
+  (("C-c w d h" . denote-org-link-to-heading)
+   ("C-c w d s" . denote-org-extract-subtree)))
+
+;; Consult-Notes for easy access to notes
+
+(use-package consult-notes
+  :custom
+  (consult-notes-denote-display-keywords-indicator "_")
+  :bind
+  (("C-c w d f" . consult-notes)
+   ("C-c w d g" . consult-notes-search-in-all-notes))
+  :init
+  (consult-notes-denote-mode))
+
+;; Citar-Denote to manage literature notes
+
+(use-package citar-denote
+  :custom
+  (citar-open-always-create-notes t)
+  :init
+  (citar-denote-mode)
+  :bind
+  (("C-c w b c" . citar-create-note)
+   ("C-c w b n" . citar-denote-open-note)
+   ("C-c w b x" . citar-denote-nocite)
+   :map org-mode-map
+   ("C-c w b k" . citar-denote-add-citekey)
+   ("C-c w b K" . citar-denote-remove-citekey)
+   ("C-c w b d" . citar-denote-dwim)
+   ("C-c w b e" . citar-denote-open-reference-entry)))
+
+;; Explore and manage your Denote collection
+
+(use-package denote-explore
+  :bind
+  (;; Statistics
+   ("C-c w x c" . denote-explore-count-notes)
+   ("C-c w x C" . denote-explore-count-keywords)
+   ("C-c w x b" . denote-explore-barchart-keywords)
+   ("C-c w x e" . denote-explore-barchart-filetypes)
+   ;; Random walks
+   ("C-c w x r" . denote-explore-random-note)
+   ("C-c w x l" . denote-explore-random-link)
+   ("C-c w x k" . denote-explore-random-keyword)
+   ("C-c w x x" . denote-explore-random-regex)
+   ;; Denote Janitor
+   ("C-c w x d" . denote-explore-identify-duplicate-notes)
+   ("C-c w x z" . denote-explore-zero-keywords)
+   ("C-c w x s" . denote-explore-single-keywords)
+   ("C-c w x o" . denote-explore-sort-keywords)
+   ("C-c w x w" . denote-explore-rename-keyword)
+   ;; Visualise denote
+   ("C-c w x n" . denote-explore-network)
+   ("C-c w x v" . denote-explore-network-regenerate)
+   ("C-c w x D" . denote-explore-barchart-degree)))
+
+;; Distraction-free writing
+
+(use-package olivetti
+  :demand t
+  :bind
+  (("C-c w o" . ews-olivetti)))
+
+;; ediff
+
+(use-package ediff
+  :ensure nil
+  :custom
+  (ediff-keep-variants nil)
+  (ediff-split-window-function 'split-window-horizontally)
+  (ediff-window-setup-function 'ediff-setup-windows-plain))
+
+;; -------------------------------------------------------------------------
+;;; content
+;; -------------------------------------------------------------------------
+
+;; Doc-View
+
+(use-package doc-view
+  :custom
+  (doc-view-resolution 300)
+  (large-file-warning-threshold (* 50 (expt 2 20))))
+
+;; Read ePub files
+
+(use-package nov
+  :init
+  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+
+;; Read RSS feeds with Elfeed
+
+(use-package elfeed
+  :custom
+  (elfeed-db-directory
+   (expand-file-name "elfeed" user-emacs-directory))
+  (elfeed-show-entry-switch 'display-buffer)
+  :bind
+  ("C-c w e" . elfeed))
 
 (provide 'init)
