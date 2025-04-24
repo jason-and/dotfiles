@@ -38,6 +38,12 @@
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 
+(use-package use-package
+  :custom
+  (use-package-always-ensure t)
+  (package-native-compile t)
+  (warning-minimum-level :emergency))
+
 ;; stop warnings when installing packages
 (add-to-list 'display-buffer-alist
              '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
@@ -86,7 +92,13 @@
 (column-number-mode 1)
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative) ;; Vim-like relative line numbers
-(global-hl-line-mode 1)                   ;; Highlight current line
+
+;;line highlighting
+;; let's enable it for all programming major modes
+(add-hook 'prog-mode-hook #'hl-line-mode)
+;; and for all modes derived from text-mode
+(add-hook 'text-mode-hook #'hl-line-mode)
+
 
 ;; disable line numbers in certain modes
 (dolist (mode '(org-mode-hook
@@ -123,12 +135,20 @@
 
 
 ;;themes
-(use-package ef-themes 
-  :ensure t
-  :config
-  (load-theme 'ef-maris-dark :no-confirm-loading))
 
-;; icons
+(use-package modus-themes
+  :custom
+  (modus-themes-to-toggle '(modus-operandi-tinted
+			    modus-vivendi-tinted))
+  :bind
+  (("C-c w t t" . modus-themes-toggle)
+   ("C-c w t m" . modus-themes-select)
+   ("C-c w t s" . consult-theme)))
+(load-theme 'modus-vivendi :no-confirm)
+
+(use-package ef-themes)
+
+; icons
 (use-package nerd-icons
   :ensure t)
 
@@ -159,6 +179,7 @@
   :init
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-want-keybinding nil)
+  (setq evil-want-C-i-jump nil)
   :config
   (evil-mode 1))
 
@@ -182,11 +203,15 @@
 
 ;; Which Key for discovering keybindings
 (use-package which-key
-  :init (which-key-mode)
   :config
+  (which-key-mode)
+  :custom
+  (which-key-max-description-length 40)
+  (which-key-lighter nil)
+  (which-key-sort-order 'which-key-description-order)
   (setq which-key-idle-delay 0.3)
   (which-key-setup-side-window-bottom))
-
+  
 
 ;; -------------------------------------------------------------------------
 ;; Completion Framework
@@ -272,7 +297,8 @@
          (r-mode . eglot-ensure)
          (css-mode . eglot-ensure)
          (html-mode . eglot-ensure)
-         (web-mode . eglot-ensure))
+         (web-mode . eglot-ensure)
+	 (ess-mode . eglot-ensure))
   :config
   ;; Configure LSP servers
   (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
@@ -289,10 +315,6 @@
 (use-package delsel
   :ensure nil ; no need to install it as it is built-in
   :hook (after-init . delete-selection-mode))
-
-;; -------------------------------------------------------------------------
-;; Programming Language Support
-;; -------------------------------------------------------------------------
 
 (use-package treesit-auto
   :custom
