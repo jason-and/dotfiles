@@ -82,8 +82,9 @@
   (setq gcmh-idle-delay 5
         gcmh-high-cons-threshold (* 16 1024 1024))) ;; 16MB
 
-(load-file (concat (file-name-as-directory user-emacs-directory)
-		   "ews.el"))
+(use-package ews
+  :straight nil
+  :load-path "~/.config/emacs/")
 
 (ews-missing-executables
  '(("gs" "mutool")
@@ -170,9 +171,9 @@
 
 (use-package modus-themes
   :bind
-  (("C-c w t t" . modus-themes-toggle)
-   ("C-c w t m" . modus-themes-select)
-   ("C-c w t s" . consult-theme)))
+  (("C-c t t" . modus-themes-toggle)
+   ("C-c t m" . modus-themes-select)
+   ("C-c t s" . consult-theme)))
 
 (use-package ef-themes)
 
@@ -232,7 +233,7 @@
 (add-hook 'after-make-frame-functions #'my/initialize-theme)
 
 ;; Replace the existing modus-themes-toggle binding
-(keymap-global-set "C-c w t t" #'my/toggle-theme)
+(keymap-global-set "C-c t t" #'my/toggle-theme)
 
 ;; Add a function to manually set a specific theme
 (defun my/set-theme (theme)
@@ -244,26 +245,22 @@
   (my/apply-theme-to-all-frames theme))
 
 ;; Bind the set-theme function
-(keymap-global-set "C-c w t s" #'my/set-theme)
+(keymap-global-set "C-c t s" #'my/set-theme)
 
 ; icons
-(use-package nerd-icons
-  :ensure t)
+(use-package nerd-icons)
 
 (use-package nerd-icons-completion
-  :ensure t
   :after marginalia
   :config
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 (use-package nerd-icons-corfu
-  :ensure t
   :after corfu
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package nerd-icons-dired
-  :ensure t
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
@@ -273,7 +270,6 @@
 ;; -------------------------------------------------------------------------
 
 (use-package evil
-  :ensure t
   :init
   (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
   (setq evil-want-keybinding nil)
@@ -283,7 +279,6 @@
 
 (use-package evil-collection
   :after evil
-  :ensure t
   :config
   (evil-collection-init))
 
@@ -294,6 +289,16 @@
   :config
   (setq-default evil-escape-key-sequence "jk")
   (setq-default evil-escape-delay 0.2))
+
+(use-package evil-surround
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+
+(use-package evil-commentary
+  :after evil
+  :config
+  (evil-commentary-mode))
 
 ;; -------------------------------------------------------------------------
 ;; Key Bindings and Command Discovery
@@ -357,7 +362,6 @@
   :hook (after-init . savehist-mode))
 
 (use-package corfu
-  :ensure t
   :init (global-corfu-mode)
   :bind (:map corfu-map ("<tab>" . corfu-complete))
   :custom
@@ -378,8 +382,7 @@
 ;; Development Tools & Features
 ;; -------------------------------------------------------------------------
 
-(use-package vterm
-  :ensure t)
+(use-package vterm)
 
 ;; Git integration
 (use-package magit
@@ -575,7 +578,6 @@ The DWIM behaviour of this command is as follows:
   (setq dired-dwim-target t))
 
 (use-package dired-subtree
-  :ensure t
   :after dired
   :bind
   ( :map dired-mode-map
@@ -587,7 +589,6 @@ The DWIM behaviour of this command is as follows:
   (setq dired-subtree-use-backgrounds nil))
 
 (use-package trashed
-  :ensure t
   :commands (trashed)
   :config
   (setq trashed-action-confirmer 'y-or-n-p)
@@ -601,7 +602,6 @@ The DWIM behaviour of this command is as follows:
 
 
 (use-package denote
-  :ensure t
   :custom
   (denote-sort-keywords t)
   (denote-link-description-function #'ews-denote-link-description-title-case)
@@ -626,8 +626,8 @@ The DWIM behaviour of this command is as follows:
 
 (use-package denote-org
   :bind
-  (("C-c w d h" . denote-org-link-to-heading)
-   ("C-c w d s" . denote-org-extract-subtree)))
+  (("C-c n d h" . denote-org-link-to-heading)
+   ("C-c n d s" . denote-org-extract-subtree)))
 
 ;; Consult-Notes for easy access to notes
 
@@ -635,8 +635,7 @@ The DWIM behaviour of this command is as follows:
   :custom
   (consult-notes-denote-display-keywords-indicator "_")
   :bind
-  (("C-c w d f" . consult-notes)
-   ("C-c w d g" . consult-notes-search-in-all-notes))
+   ("C-c n s" . consult-notes-search-in-all-notes))
   :init
   (consult-notes-denote-mode))
 
@@ -648,39 +647,14 @@ The DWIM behaviour of this command is as follows:
   :init
   (citar-denote-mode)
   :bind
-  (("C-c w b c" . citar-create-note)
-   ("C-c w b n" . citar-denote-open-note)
-   ("C-c w b x" . citar-denote-nocite)
+  (("C-c n b c" . citar-create-note)
+   ("C-c n b n" . citar-denote-open-note)
+   ("C-c n b x" . citar-denote-nocite)
    :map org-mode-map
-   ("C-c w b k" . citar-denote-add-citekey)
-   ("C-c w b K" . citar-denote-remove-citekey)
-   ("C-c w b d" . citar-denote-dwim)
-   ("C-c w b e" . citar-denote-open-reference-entry)))
-
-;; Explore and manage your Denote collection
-
-(use-package denote-explore
-  :bind
-  (;; Statistics
-   ("C-c w x c" . denote-explore-count-notes)
-   ("C-c w x C" . denote-explore-count-keywords)
-   ("C-c w x b" . denote-explore-barchart-keywords)
-   ("C-c w x e" . denote-explore-barchart-filetypes)
-   ;; Random walks
-   ("C-c w x r" . denote-explore-random-note)
-   ("C-c w x l" . denote-explore-random-link)
-   ("C-c w x k" . denote-explore-random-keyword)
-   ("C-c w x x" . denote-explore-random-regex)
-   ;; Denote Janitor
-   ("C-c w x d" . denote-explore-identify-duplicate-notes)
-   ("C-c w x z" . denote-explore-zero-keywords)
-   ("C-c w x s" . denote-explore-single-keywords)
-   ("C-c w x o" . denote-explore-sort-keywords)
-   ("C-c w x w" . denote-explore-rename-keyword)
-   ;; Visualise denote
-   ("C-c w x n" . denote-explore-network)
-   ("C-c w x v" . denote-explore-network-regenerate)
-   ("C-c w x D" . denote-explore-barchart-degree)))
+   ("C-c n b k" . citar-denote-add-citekey)
+   ("C-c n b K" . citar-denote-remove-citekey)
+   ("C-c n b d" . citar-denote-dwim)
+   ("C-c n b e" . citar-denote-open-reference-entry)))
 
 ;; Distraction-free writing
 
