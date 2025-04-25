@@ -50,7 +50,7 @@
 ;; -------------------------------------------------------------------------
 
 ;;start server for emacs client
-;;(server-start)
+;(server-start)
 
 ;;short answers
 (setq use-short-answers t)
@@ -169,16 +169,82 @@
 ;;themes
 
 (use-package modus-themes
-  :custom
-  (modus-themes-to-toggle '(modus-operandi-tinted
-			    modus-vivendi-tinted))
   :bind
   (("C-c w t t" . modus-themes-toggle)
    ("C-c w t m" . modus-themes-select)
    ("C-c w t s" . consult-theme)))
-(load-theme 'modus-vivendi :no-confirm)
 
 (use-package ef-themes)
+
+;;; Theme synchronization across frames
+
+;; Define day and night themes
+(defvar my/daytime-theme 'ef-cyprus
+  "Theme to use during the day.")
+
+(defvar my/nighttime-theme 'modus-vivendi-tinted
+  "Theme to use during the night.")
+
+(defvar my/daytime-start 8
+  "Hour to switch to daytime theme (24-hour format).")
+
+(defvar my/nighttime-start 19
+  "Hour to switch to nighttime theme (24-hour format).")
+
+;; Function to apply theme to all frames
+(defun my/apply-theme-to-all-frames (theme)
+  "Apply THEME to all frames."
+  (mapc #'disable-theme custom-enabled-themes)
+  (load-theme theme t)
+  (dolist (frame (frame-list))
+    (with-selected-frame frame
+      (enable-theme theme))))
+
+;; Function to determine theme based on time
+(defun my/get-theme-for-time ()
+  "Return the appropriate theme based on current time."
+  (let ((current-hour (string-to-number (format-time-string "%H"))))
+    (if (and (>= current-hour my/daytime-start)
+             (< current-hour my/nighttime-start))
+        my/daytime-theme
+      my/nighttime-theme)))
+
+;; Function to initialize theme if no frames exist
+(defun my/initialize-theme (frame)
+  "Initialize theme for the first frame or synchronize with existing frames."
+  (if (eq (length (frame-list)) 1) ; Is this the first frame?
+      (my/apply-theme-to-all-frames (my/get-theme-for-time))
+    ;; Otherwise sync with existing frames
+    (let ((current-theme (car custom-enabled-themes)))
+      (when current-theme
+        (with-selected-frame frame
+          (enable-theme current-theme))))))
+
+;; Toggle theme function that affects all frames
+(defun my/toggle-theme ()
+  "Toggle between day and night themes across all frames."
+  (interactive)
+  (if (eq (car custom-enabled-themes) my/daytime-theme)
+      (my/apply-theme-to-all-frames my/nighttime-theme)
+    (my/apply-theme-to-all-frames my/daytime-theme)))
+
+;; Add hook for new frames
+(add-hook 'after-make-frame-functions #'my/initialize-theme)
+
+;; Replace the existing modus-themes-toggle binding
+(keymap-global-set "C-c w t t" #'my/toggle-theme)
+
+;; Add a function to manually set a specific theme
+(defun my/set-theme (theme)
+  "Set a specific THEME across all frames."
+  (interactive
+   (list (intern (completing-read "Choose theme: "
+                                 (mapcar #'symbol-name
+                                         (custom-available-themes))))))
+  (my/apply-theme-to-all-frames theme))
+
+;; Bind the set-theme function
+(keymap-global-set "C-c w t s" #'my/set-theme)
 
 ; icons
 (use-package nerd-icons
@@ -287,7 +353,7 @@
          ("C-s" . consult-line)))
 
 (use-package savehist
-  :ensure nil ; it is built-in
+  :straight nil
   :hook (after-init . savehist-mode))
 
 (use-package corfu
@@ -337,13 +403,6 @@
   (add-to-list 'eglot-server-programs '(r-mode . ("R" "--slave" "-e" "languageserver::run()")))
   (add-to-list 'eglot-server-programs '(web-mode . ("vscode-html-language-server" "--stdio"))))
 
-;; Configure R formatting style
-(setq-default eglot-workspace-configuration
-              '((r . ((style.spacing . 1)    ;; Number of spaces around operators
-                      (style.indentation . 2) ;; Indentation size
-                      (lsp.diagnostics . t)   ;; Keep diagnostics (linting)
-                      (lsp.formatting . t))))) ;; Keep formatting enabled
-;; Snippets
 (use-package yasnippet
   :init (yas-global-mode 1))
 
@@ -351,7 +410,7 @@
 
 ;; Delete the selected text upon text insertion
 (use-package delsel
-  :ensure nil ; no need to install it as it is built-in
+  :straight nil ; no need to install it as it is built-in
   :hook (after-init . delete-selection-mode))
 
 (use-package treesit-auto
@@ -378,6 +437,11 @@
   :config
   ;; Optional: Add command line arguments if needed
   (setq inferior-R-args "--no-save --no-restore-data --quiet"))
+
+(use-package format-all
+  :hook (ess-r-mode . format-all-mode)
+  :config
+  (setq-default format-all-formatters '(("R" styler))))
 
 (use-package ess-view-data
   :after ess
@@ -437,8 +501,7 @@
 ;; -------------------------------------------------------------------------
 
 (use-package text-mode
-  :ensure
-  nil
+  :straight nil
   :hook
   (text-mode . visual-line-mode)
   :init
@@ -500,7 +563,7 @@ The DWIM behaviour of this command is as follows:
 ;; -------------------------------------------------------------------------
 
 (use-package dired
-  :ensure nil
+  :straight nil
   :commands (dired)
   :hook
   ((dired-mode . dired-hide-details-mode)
@@ -538,6 +601,7 @@ The DWIM behaviour of this command is as follows:
 
 
 (use-package denote
+  :ensure t
   :custom
   (denote-sort-keywords t)
   (denote-link-description-function #'ews-denote-link-description-title-case)
@@ -546,14 +610,19 @@ The DWIM behaviour of this command is as follows:
   :custom-face
   (denote-faces-link ((t (:slant italic))))
   :bind
-  (("C-c w d b" . denote-find-backlink)
-   ("C-c w d d" . denote-date)
-   ("C-c w d l" . denote-find-link)
-   ("C-c w d i" . denote-link-or-create)
-   ("C-c w d k" . denote-rename-file-keywords)
-   ("C-c w d n" . denote)
-   ("C-c w d r" . denote-rename-file)
-   ("C-c w d R" . denote-rename-file-using-front-matter)))
+  (("C-c n n" . denote)
+   ("C-c n r" . denote-rename-file)
+   ("C-c n l" . denote-link)
+   ("C-c n b" . denote-backlinks)
+   ("C-c n d" . denote-dired)
+   ("C-c n g" . denote-grep))
+   :config
+   (setq denote-directory (expand-file-name "~/Documents/notes/"))
+   (denote-rename-buffer-mode 1)
+   (setq denote-prompts '(title keywords))
+   (setq denote-infer-keywords t)
+   (setq denote-sort-keywords t)
+   (setq denote-file-type 'markdown))
 
 (use-package denote-org
   :bind
@@ -623,7 +692,7 @@ The DWIM behaviour of this command is as follows:
 ;; ediff
 
 (use-package ediff
-  :ensure nil
+  :straight nil
   :custom
   (ediff-keep-variants nil)
   (ediff-split-window-function 'split-window-horizontally)
