@@ -15,7 +15,6 @@
     "tray",
     "network",
     "power-profiles-daemon",
-    "custom/optimus",
     "battery",
     "custom/power",
   ],
@@ -65,15 +64,6 @@
     "today-format": "<span color='#ff6699'><b>{}</b></span>",
   },
 
-  "custom/optimus": {
-    "format": "{}",
-    "return-type": "json",
-    "interval": 5,
-    "exec": "~/.config/waybar/scripts/optimus-manager.sh",
-    "on-click": "~/.config/waybar/scripts/optimus-manager.sh toggle && notify-send 'Optimus Manager' 'GPU mode change requested. Log out to apply.'",
-    "on-click-right": "~/.config/waybar/scripts/optimus-menu.sh",
-    "tooltip": true,
-  },
   "power-profiles-daemon": {
     "format": "{icon}",
     "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
