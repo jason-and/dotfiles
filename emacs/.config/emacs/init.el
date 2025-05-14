@@ -4,6 +4,7 @@
 ;; Startup Performance Optimization
 ;; -------------------------------------------------------------------------
 
+;;; code:
 ;; Restore reasonable GC settings after startup
 (add-hook 'emacs-startup-hook
           (lambda ()
@@ -55,10 +56,6 @@
 ;;short answers
 (setq use-short-answers t)
 
-;; Bind key for customising variables
-
-(keymap-global-set "C-c w v" 'customize-variable)
-
 ;;prompt for kill emacs
 (setq confirm-kill-emacs 'yes-or-no-p)
 
@@ -85,21 +82,6 @@
 (use-package ews
   :straight nil
   :load-path "~/.config/emacs/")
-
-(ews-missing-executables
- '(("gs" "mutool")
-   "pdftotext"
-   "soffice"
-   "zip"
-   "ddjvu"
-   "curl"
-   ("mpg321" "ogg123" "mplayer" "mpv" "vlc") 
-   ("grep" "ripgrep")
-   ("convert" "gm")
-   "dvipng"
-   "latex"
-   "hunspell"
-   "git"))
 
 ; -------------------------------------------------------------------------
 ;; Core UI Configuration
@@ -139,14 +121,29 @@
   :config
   (balanced-windows-mode))
 
+(use-package popper
+  :straight t
+  :bind (("C-`"   . popper-toggle)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          help-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))                ; For echo area hints
+
 ;; Enhanced mode line
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :config
-  (setq doom-modeline-height 25)
-  (setq doom-modeline-bar-width 3)
-  (setq doom-modeline-project-detection 'project)
-  (setq doom-modeline-buffer-file-name-style 'relative-from-project))
+;; (use-package doom-modeline
+;;   :init (doom-modeline-mode 1)
+;;   :config
+;;   (setq doom-modeline-height 25)
+;;   (setq doom-modeline-bar-width 3)
+;;   (setq doom-modeline-project-detection 'project)
+;;   (setq doom-modeline-buffer-file-name-style 'relative-from-project))
 
 ;; Highlight matching parentheses
 (show-paren-mode 1)
@@ -175,77 +172,10 @@
    ("C-c t m" . modus-themes-select)
    ("C-c t s" . consult-theme)))
 
-(use-package ef-themes)
-
-;;; Theme synchronization across frames
-
-;; Define day and night themes
-(defvar my/daytime-theme 'ef-cyprus
-  "Theme to use during the day.")
-
-(defvar my/nighttime-theme 'modus-vivendi-tinted
-  "Theme to use during the night.")
-
-(defvar my/daytime-start 8
-  "Hour to switch to daytime theme (24-hour format).")
-
-(defvar my/nighttime-start 19
-  "Hour to switch to nighttime theme (24-hour format).")
-
-;; Function to apply theme to all frames
-(defun my/apply-theme-to-all-frames (theme)
-  "Apply THEME to all frames."
-  (mapc #'disable-theme custom-enabled-themes)
-  (load-theme theme t)
-  (dolist (frame (frame-list))
-    (with-selected-frame frame
-      (enable-theme theme))))
-
-;; Function to determine theme based on time
-(defun my/get-theme-for-time ()
-  "Return the appropriate theme based on current time."
-  (let ((current-hour (string-to-number (format-time-string "%H"))))
-    (if (and (>= current-hour my/daytime-start)
-             (< current-hour my/nighttime-start))
-        my/daytime-theme
-      my/nighttime-theme)))
-
-;; Function to initialize theme if no frames exist
-(defun my/initialize-theme (frame)
-  "Initialize theme for the first frame or synchronize with existing frames."
-  (if (eq (length (frame-list)) 1) ; Is this the first frame?
-      (my/apply-theme-to-all-frames (my/get-theme-for-time))
-    ;; Otherwise sync with existing frames
-    (let ((current-theme (car custom-enabled-themes)))
-      (when current-theme
-        (with-selected-frame frame
-          (enable-theme current-theme))))))
-
-;; Toggle theme function that affects all frames
-(defun my/toggle-theme ()
-  "Toggle between day and night themes across all frames."
-  (interactive)
-  (if (eq (car custom-enabled-themes) my/daytime-theme)
-      (my/apply-theme-to-all-frames my/nighttime-theme)
-    (my/apply-theme-to-all-frames my/daytime-theme)))
-
-;; Add hook for new frames
-(add-hook 'after-make-frame-functions #'my/initialize-theme)
-
-;; Replace the existing modus-themes-toggle binding
-(keymap-global-set "C-c t t" #'my/toggle-theme)
-
-;; Add a function to manually set a specific theme
-(defun my/set-theme (theme)
-  "Set a specific THEME across all frames."
-  (interactive
-   (list (intern (completing-read "Choose theme: "
-                                 (mapcar #'symbol-name
-                                         (custom-available-themes))))))
-  (my/apply-theme-to-all-frames theme))
-
-;; Bind the set-theme function
-(keymap-global-set "C-c t s" #'my/set-theme)
+(use-package ef-themes
+  :ensure t
+  :config
+(load-theme 'ef-cyprus :no-confirm-loading))
 
 ; icons
 (use-package nerd-icons)
@@ -415,6 +345,7 @@
 (use-package delsel
   :straight nil ; no need to install it as it is built-in
   :hook (after-init . delete-selection-mode))
+
 
 (use-package treesit-auto
   :custom
@@ -600,7 +531,6 @@ The DWIM behaviour of this command is as follows:
 ;;; Denote
 ;; -------------------------------------------------------------------------
 
-
 (use-package denote
   :custom
   (denote-sort-keywords t)
@@ -629,15 +559,18 @@ The DWIM behaviour of this command is as follows:
   (("C-c n d h" . denote-org-link-to-heading)
    ("C-c n d s" . denote-org-extract-subtree)))
 
+(use-package denote-markdown
+  :ensure t)
+
 ;; Consult-Notes for easy access to notes
 
-(use-package consult-notes
-  :custom
-  (consult-notes-denote-display-keywords-indicator "_")
+(use-package consult-denote
+  :ensure t
   :bind
-   ("C-c n s" . consult-notes-search-in-all-notes))
-  :init
-  (consult-notes-denote-mode))
+  (("C-c n f" . consult-denote-find)
+   ("C-c n g" . consult-denote-grep))
+  :config
+  (consult-denote-mode 1))
 
 ;; Citar-Denote to manage literature notes
 
