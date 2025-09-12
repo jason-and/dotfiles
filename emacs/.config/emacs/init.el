@@ -102,14 +102,12 @@
 ;; disable line numbers in certain modes
 (dolist (mode '(org-mode-hook
 		term-mode-hook
-		eshell-mode-hook))
+		eshell-mode-hook
+		eww-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-
 
 (setq visible-bell t            ; flash the bell rings
       use-dialog-box nil)       ; no dialog boxes
-
 
 ;; Window management
 ;; Split windows sensibly
@@ -119,7 +117,7 @@
 
 (use-package balanced-windows
   :config
-  (balanced-windows-mode))
+  (balanced-windows-mode 1))
 
 (use-package popper
   :straight t
@@ -145,6 +143,11 @@
 ;;   (setq doom-modeline-project-detection 'project)
 ;;   (setq doom-modeline-buffer-file-name-style 'relative-from-project))
 
+(use-package spacious-padding
+  :straight t
+  :config
+  (spacious-padding-mode))
+
 ;; Highlight matching parentheses
 (show-paren-mode 1)
 (use-package rainbow-delimiters
@@ -166,16 +169,30 @@
 
 ;;themes
 
-(use-package modus-themes
-  :bind
-  (("C-c t t" . modus-themes-toggle)
-   ("C-c t m" . modus-themes-select)
-   ("C-c t s" . consult-theme)))
+(use-package modus-themes)
 
 (use-package ef-themes
   :ensure t
   :config
+(mapc #'disable-theme custom-enabled-themes)
+(setq ef-themes-mixed-fonts t)
+(setq ef-themes-to-toggle '(ef-cyprus ef-autumn))
 (load-theme 'ef-cyprus :no-confirm-loading))
+
+
+(use-package doric-themes
+  :ensure t
+  :demand t
+  :config
+  ;; These are the default values.
+  (setq doric-themes-to-toggle '(doric-light doric-dark))
+  (setq doric-themes-to-rotate doric-themes-collection)
+
+  (doric-themes-select 'doric-light)
+  :bind
+  (("<f5>" . doric-themes-toggle)
+   ("C-<f5>" . doric-themes-select)
+   ("M-<f5>" . doric-themes-rotate)))
 
 ; icons
 (use-package nerd-icons)
@@ -318,6 +335,8 @@
 (use-package magit
   :commands magit-status)
 
+(setq-default ispell-program-name "hunspell")
+
 ;; Syntax checking
 (use-package flycheck
   :init (global-flycheck-mode))
@@ -365,7 +384,22 @@
   :defer t)
 
 ;; R support
+
+;; R operator insertion functions
+(defun my/insert-r-assignment ()
+  "Insert R assignment operator with spaces."
+  (interactive)
+  (insert " <- "))
+
+(defun my/insert-r-pipe-native ()
+  "Insert R native pipe operator with spaces."
+  (interactive)
+  (insert " |> "))
+
 (use-package ess
+  :bind (:map ess-r-mode-map
+	("M--" . my/insert-r-assignment)  ; Alt + hyphen
+        ("C-c p" . my/insert-r-pipe-native)) ; Ctrl+c p for |>
   :init
   (require 'ess-site)
   :config
@@ -412,6 +446,14 @@
   :mode ("README\\.md\\'" . gfm-mode)
   :mode ("\\.md\\'" . markdown-mode))
 
+(use-package ledger-mode
+  :custom
+  ((ledger-binary-path "hledger")
+   (ledger-mode-should-check-version nil)
+   (ledger-report-auto-width nil)
+   (ledger-report-links-in-register nil)
+   (ledger-report-native-highlighting-arguments '("--color=always")))
+  :mode ("\\.hledger\\'" "\\.ledger\\'"))
 ;; -------------------------------------------------------------------------
 ;; Org Mode Configuration
 ;; -------------------------------------------------------------------------
@@ -448,6 +490,9 @@
 ;;recent files
 (recentf-mode 1)
 
+;;saves sessions
+(desktop-save-mode 1)
+
 ;;comand history settings
 (setq history-length 25)
 (savehist-mode 1)
@@ -464,6 +509,9 @@
 ;; move customization variables to a separate file and load it
 (setq custom-file (locate-user-emacs-file "custom-vars.el"))
 (load custom-file 'noerror 'nomessage)
+
+;; stop creation of ~ files
+(setq make-backup-files nil)
 
 ;; C-g is more helpful
 (defun prot/keyboard-quit-dwim ()

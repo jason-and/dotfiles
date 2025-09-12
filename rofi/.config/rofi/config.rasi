@@ -7,7 +7,7 @@ configuration {
 /*	fixed-num-lines: true;*/
 /*	show-icons: false;*/
 /*	preview-cmd: ;*/
-/*	terminal: "rofi-sensible-terminal";*/
+/*	terminal: "wezterm";*/
 /*	ssh-client: "ssh";*/
 /*	ssh-command: "{terminal} -e {ssh-client} {host} [-p {port}]";*/
 /*	run-command: "{cmd}";*/
@@ -27,7 +27,8 @@ configuration {
 /*	sorting-method: "normal";*/
 /*	case-sensitive: false;*/
 /*	cycle: true;*/
-/*	sidebar-mode: false;*/
+
+
 /*	hover-select: false;*/
 /*	eh: 1;*/
 /*	auto-select: false;*/
@@ -155,3 +156,8 @@ configuration {
       sorting-method:    "name";
   }
 }
+
+
+//theme import
+
+@theme ".config/rofi/themes/square-green.rasi"

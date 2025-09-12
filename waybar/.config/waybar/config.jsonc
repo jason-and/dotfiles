@@ -1,39 +1,30 @@
-// -*- mode: jsonc -*-
 {
-  // "layer": "top", // Waybar at top layer
-  // "position": "bottom", // Waybar position (top|bottom|left|right)
-  "height": 30, // Waybar height (to be removed for auto height)
-  // "width": 1280, // Waybar width
-  "spacing": 4, // Gaps between modules (4px)
-  // Choose the order of the modules
-  "modules-left": ["hyprland/workspaces", "wlr/taskbar", "hyprland/window"],
+  "layer": "top",
+  "modules-left": ["niri/workspaces", "wlr/taskbar", "niri/window"],
   "modules-center": ["clock"],
   "modules-right": [
-    "idle_inhibitor",
+    "backlight",
     "pulseaudio",
-    "bluetooth",
-    "tray",
-    "network",
-    "power-profiles-daemon",
     "battery",
+    "network",
+    "bluetooth",
+    "cpu",
+    "memory",
+    "power-profiles-daemon",
+    "tray",
+    "custom/nvidia",
     "custom/power",
   ],
-  // Modules configuration
-  "hyprland/workspaces": {
-    "on-click": "activate",
-    "sort-by-number": true,
-    "format": "{name}: {icon}",
+
+  "niri/workspaces": {
+    "disable-click": true,
+    "format": "{icon}",
     "format-icons": {
-      "active": "",
-      "default": "",
-    },
-    "persistent-workspaces": {
-      "1": [],
-      "2": [],
-      "3": [],
-      "4": [],
-      "5": [],
-      "6": [],
+      "darktable": "",
+      "game": "󰓓",
+      "GIS": "",
+      "active": " ",
+      "default": " ",
     },
   },
   "wlr/taskbar": {
@@ -44,62 +35,64 @@
     "on-click-middle": "close",
     "active-first": true,
   },
-
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {
-      "activated": "",
-      "deactivated": "",
-    },
+  "niri/window": {
+    "icon": true,
+    "icon-size": 18,
+    "max-length": 70,
   },
-  "tray": {
-    "icon-size": 16,
-    "spacing": 10,
-    "show-passive-items": true,
+  "backlight": {
+    "device": "intel_backlight",
+    "format": "󰃟 {percent}% ",
   },
-  "clock": {
-    "format": "{:%H:%M}",
-    "format-alt": "{:%Y-%m-%d}",
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-    "today-format": "<span color='#ff6699'><b>{}</b></span>",
-  },
-
-  "power-profiles-daemon": {
-    "format": "{icon}",
-    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
-    "tooltip": true,
-    "format-icons": {
-      "default": "",
-      "performance": "",
-      "balanced": "  ",
-      "power-saver": " ",
-    },
-  },
-
-  "network": {
-    "format-wifi": "  {essid}",
-    "format-ethernet": "󰈀 {ipaddr}",
-    "format-linked": "󰈀 {ifname} (No IP)",
-    "format-disconnected": "󰖪 Disconnected",
-    "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
-    "on-click": "nm-connection-editor",
-  },
-
   "pulseaudio": {
     "format": "{icon} {volume}%",
-    "format-muted": "󰝟 Muted",
-    "format-bluetooth": "{volume}% {icon} {format_source}",
-    "format-bluetooth-muted": " {icon} {format_source}",
-    "format-icons": {
-      "default": ["", "", ""],
-    },
+    "format-bluetooth": "{volume}% {icon}",
+    "tooltip-format": "{desc} - {volume} %",
+    "format-muted": "",
     "on-click": "pavucontrol",
-    "tooltip": true,
-    "tooltip-format": "{desc} - {volume}%",
+    "format-icons": {
+      "headphone": "",
+      "default": ["", ""],
+    },
+    "reverse-scrolling": true,
+    "scroll-step": 1,
+  },
+
+  "battery": {
+    "states": {
+      "good": 100,
+      "warning": 30,
+      "critical": 15,
+    },
+    "interval": 10,
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰂄 {capacity}%",
+    "format-icons": ["󰁻", "󰁽", "󰁿", "󰂁", "󰁹"],
+  },
+  "network": {
+    "format": "{ifname}",
+    "format-wifi": "  {essid}",
+    "format-ethernet": "󰈀  {ifname}",
+    "format-disconnected": "Disconnected",
+    "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
+    "tooltip-format-ethernet": "󰈀  {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits}",
+    "tooltip-format-disconnected": "Disconnected",
+    "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
+    "on-click": "nm-connection-editor",
+    "max-length": 50,
+  },
+  "cpu": {
+    "format": " {usage}%",
+    "interval": 10,
+  },
+  "memory": {
+    "format": " {}%",
+    "interval": 10,
   },
 
   "bluetooth": {
-    "format": " {status}",
+    "format": " {icon}",
     "format-connected": " {device_alias}",
     "format-connected-battery": " {device_alias} {device_battery_percentage}%",
     "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
@@ -109,9 +102,36 @@
     "on-click": "blueman-manager",
   },
 
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+    "tooltip": true,
+    "format-icons": {
+      "default": "",
+      "performance": "",
+      "balanced": ",",
+      "power-saver": "",
+    },
+  },
+
+  "tray": {
+    "icon-size": 15,
+    "spacing": 6,
+  },
+  "custom/nvidia": {
+    "exec": "nvidia-smi --query-gpu=utilization.gpu,temperature.gpu --format=csv,nounits,noheader | sed 's/\\([0-9]\\+\\), \\([0-9]\\+\\)/\\1% 🌡️\\2°C/g'",
+    "format": "{}",
+    "interval": 2,
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%Y-%m-%d}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "today-format": "<span color='#ff6699'><b>{}</b></span>",
+  },
   "custom/power": {
-    "format": "⏻",
-    "on-click": "~/.config/rofi/power-menu.sh",
-    "tooltip": false,
+    "format": "<span color='#FF4040'>  </span>",
+    "on-click": "rofi -show power-menu -modi power-menu:rofi-power-menu",
   },
 }
+

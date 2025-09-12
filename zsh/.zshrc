@@ -21,7 +21,7 @@ setopt hist_verify
 # =============================================================================
 # Basic Aliases
 # =============================================================================
-alias em='emacsclient -n -c'
+alias em='emacsclient -n -c -a emac'
 alias grep='grep -n --color'
 alias cat='bat'
 alias ls="eza --color=always --long -G --git -a -m --group-directories-first  --icons=always --no-time --no-user --no-permissions"
@@ -34,7 +34,8 @@ alias vim='nvim'
 alias cp='cp -i -v'
 alias mv='mv -i -v'
 alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
-
+alias rm='rm -i -v'
+alias qgis='QT_QPA_PLATFORM=xcb qgis &'
 # -----------------------------------------------------
 # Git
 # -----------------------------------------------------
@@ -139,3 +140,4 @@ export PATH="/home/andrew/.pixi/bin:$PATH"
 #vim motions in terminal
 bindkey -v
 
+export LEDGER_FILE=~/finance/2025.journal

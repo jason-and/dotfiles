@@ -16,8 +16,8 @@
 (push '(undecorated . t) default-frame-alist) ;; Remove frame decoration
 
 ;; Use a dark background from the start to prevent white flash
-(push '(background-color . "#000000") default-frame-alist)
-(push '(foreground-color . "#bbc2cf") default-frame-alist)
+;;(push '(background-color . "#000000") default-frame-alist)
+;;(push '(foreground-color . "#bbc2cf") default-frame-alist)
 
 ;; Don't resize the frame at this early stage
 (setq frame-inhibit-implied-resize t)
