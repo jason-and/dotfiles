@@ -308,3 +308,5 @@ generate links in titlecase for attachments."
      (title (format "%s" (titlecase--string clean-title titlecase-style)))
      (t ""))))
 
+(provide 'ews)
+;;; ews.el ends here
