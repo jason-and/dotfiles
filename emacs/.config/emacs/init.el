@@ -443,11 +443,14 @@
   :config
   ;; Optional: Add command line arguments if needed
   (setq inferior-R-args "--no-save --no-restore-data --quiet")
-(add-hook 'ess-r-mode-hook
-          (lambda ()
-            (setq ess-graphics-device-function 
-                  (lambda () "x11(type='cairo')"))))
-  )
+              (add-hook 'ess-r-mode-hook
+            (lambda ()
+              ;; Start httpgd server when R starts
+              (add-hook 'inferior-ess-mode-hook
+                        (lambda ()
+                          (ess-eval-linewise "httpgd::hgd(host='127.0.0.1', port=8888)")
+                          (browse-url "http://127.0.0.1:8888/live"))
+                        nil t))))
 
 (use-package ess-plot
   :straight (ess-plot :type git :host github :repo "DennieTeMolder/ess-plot")
