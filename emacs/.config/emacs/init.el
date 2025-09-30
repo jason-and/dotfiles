@@ -442,7 +442,16 @@
   (require 'ess-site)
   :config
   ;; Optional: Add command line arguments if needed
-  (setq inferior-R-args "--no-save --no-restore-data --quiet"))
+  (setq inferior-R-args "--no-save --no-restore-data --quiet")
+(add-hook 'ess-r-mode-hook
+          (lambda ()
+            (setq ess-graphics-device-function 
+                  (lambda () "x11(type='cairo')"))))
+  )
+
+(use-package ess-plot
+  :straight (ess-plot :type git :host github :repo "DennieTeMolder/ess-plot")
+  :hook (ess-r-post-run . ess-plot-on-startup-h))
 
 (use-package format-all
   :hook (ess-r-mode . format-all-mode)
@@ -452,6 +461,12 @@
 (use-package ess-view-data
   :after ess
 (require 'ess-view-data))
+
+(use-package poly-R
+  :ensure t)
+
+(use-package quarto-mode
+  :ensure t)
 
 ;; Web development
 (use-package web-mode
