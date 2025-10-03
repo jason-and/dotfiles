@@ -132,6 +132,8 @@ export NVM_DIR="$HOME/.nvm"
 # Starship prompt
 eval "$(starship init zsh)"
 
+# systemd use user enviroment
+systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XAUTHORITY
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/home/andrew/.lmstudio/bin"

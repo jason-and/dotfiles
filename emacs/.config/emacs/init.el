@@ -268,6 +268,10 @@
   (which-key-sort-order 'which-key-description-order)
   (which-key-setup-side-window-right-bottom))
   
+(use-package keycast
+  :config
+  (keycast-mode)
+  (keycast-mode-line-mode))
 
 ;; -------------------------------------------------------------------------
 ;; Completion Framework
