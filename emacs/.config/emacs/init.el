@@ -115,33 +115,28 @@
           "Output\\*$"
           "\\*Async Shell Command\\*"
           help-mode
+	  helpful-mode
           compilation-mode))
   (popper-mode +1)
   (popper-echo-mode +1))                ; For echo area hints
 
-(use-package modus-themes)
+(use-package modus-themes
+  :ensure t
+  :config
+  (mapc #'disable-theme custom-enabled-themes)
+  (setq modus-themes-italic-constructs t
+	 modus-themes-bold-constructs t)
+  (modus-themes-include-derivatives-mode 1)
+
+(define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 
 (use-package ef-themes
   :ensure t
   :config
-  (mapc #'disable-theme custom-enabled-themes)
-  (setq ef-themes-mixed-fonts t)
-  (setq ef-themes-to-toggle '(ef-cyprus ef-autumn))
-  (load-theme 'ef-cyprus :no-confirm-loading))
+  (setq ef-themes-to-toggle '(ef-day ef-owl))
+  (load-theme 'ef-day :no-confirm-loading))
 
-(use-package doric-themes
-  :ensure t
-  :demand t
-  :config
-  ;; These are the default values.
-  (setq doric-themes-to-toggle '(doric-light doric-dark))
-  (setq doric-themes-to-rotate doric-themes-collection)
-
-  (doric-themes-select 'doric-light)
-  :bind
-  (("<f5>" . doric-themes-toggle)
-   ("C-<f5>" . doric-themes-select)
-   ("M-<f5>" . doric-themes-rotate)))
+(use-package doric-themes)
 
 (use-package nerd-icons)
 
@@ -165,6 +160,8 @@
   (setq spacious-padding-subtle-frame-lines
   	`( :mode-line-active 'default
            :mode-line-inactive vertical-border))
+  :custom
+  (line-spacing 3)
   (spacious-padding-mode 1))
 
 ;; Highlight matching parentheses
@@ -227,7 +224,7 @@
 
 ;;; Which Key 
 
-  ;; Which Key for discovering keybindings
+  ;; Which Key for discovering keybinding;; s
   (use-package which-key
     :init
     (setq which-key-idle-delay 0.3)
@@ -276,64 +273,87 @@
         completions-header-format nil))
 
 ;; Enhanced command, buffer, and file selection
-(use-package consult
-  :bind (("C-x b" . consult-buffer)
-         ("C-x 4 b" . consult-buffer-other-window)
-         ("C-c s" . consult-ripgrep)
-         ("C-s" . consult-line)))
+  (use-package consult
+    :bind (("C-x b" . consult-buffer)
+           ("C-x 4 b" . consult-buffer-other-window)
+           ("C-c s" . consult-ripgrep)
+           ("C-s" . consult-line)))
 
-(use-package savehist
-  :straight nil
-  :hook (after-init . savehist-mode))
+  (use-package savehist
+    :straight nil
+    :hook (after-init . savehist-mode))
 
-(use-package corfu
-  :init (global-corfu-mode)
-  :bind (:map corfu-map ("<tab>" . corfu-complete))
-  :custom
-  (tab-always-indent 'complete)
-  (corfu-preview-current nil)
-  (corfu-min-width 20)
-  (corfu-auto t)
-  (corfu-auto-prefix 2)
-  (corfu-cycle t)
-  (setq corfu-popupinfo-delay '(1.25 . 0.5))
-  (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
+  (use-package corfu
+    :init (global-corfu-mode)
+    :bind (:map corfu-map ("<tab>" . corfu-complete))
+    :custom
+    (tab-always-indent 'complete)
+    (corfu-preview-current nil)
+    (corfu-min-width 20)
+    (corfu-auto t)
+    (corfu-auto-prefix 2)
+    (corfu-cycle t)
+    (setq corfu-popupinfo-delay '(1.25 . 0.5))
+    (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
 
-  ;; Sort by input history (no need to modify `corfu-sort-function').
-  (with-eval-after-load 'savehist
-    (corfu-history-mode 1)
-    (add-to-list 'savehist-additional-variables 'corfu-history)))
+    ;; Sort by input history (no need to modify `corfu-sort-function').
+    (with-eval-after-load 'savehist
+      (corfu-history-mode 1)
+      (add-to-list 'savehist-additional-variables 'corfu-history)))
 
-(use-package embark
-  :ensure t
 
-  :bind
-  (("C-," . embark-act)         ;; pick some comfortable binding
-   ("C-;" . embark-dwim)        ;; good alternative: M-.
-   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
-
+(use-package cape
+  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+  ;; Press C-c p ? to for help.
+  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+  ;; Alternatively bind Cape commands individually.
+  ;; :bind (("C-c p d" . cape-dabbrev)
+  ;;        ("C-c p h" . cape-history)
+  ;;        ("C-c p f" . cape-file)
+  ;;        ...)
   :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
+  ;; ...
+)
+  (use-package embark
+    :ensure t
 
-  ;; Optionally replace the key help with a completing-read interface
-  (setq prefix-help-command #'embark-prefix-help-command)
+    :bind
+    (("C-," . embark-act)         ;; pick some comfortable binding
+     ("C-;" . embark-dwim)        ;; good alternative: M-.
+     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
 
-  :config
+    :init
 
-  ;; Hide the mode line of the Embark live/completions buffers
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
+    ;; Optionally replace the key help with a completing-read interface
+    (setq prefix-help-command #'embark-prefix-help-command)
 
-;; Consult users will also want the embark-consult package.
-(use-package embark-consult
-  :ensure t
-  :after (embark consult)
-  :demand t ; only necessary if you have the hook below
-  ;; if you want to have consult previews as you move around an
-  ;; auto-updating embark collect buffer
-  :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
+    :config
+    (vertico-multiform-mode)
+    (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
+
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                   nil
+                   (window-parameters (mode-line-format . none)))))
+
+  ;; Consult users will also want the embark-consult package.
+  (use-package embark-consult
+    :ensure t
+    :after (embark consult)
+    :demand t ; only necessary if you have the hook below
+    ;; if you want to have consult previews as you move around an
+    ;; auto-updating embark collect buffer
+    :hook
+    (embark-collect-mode . consult-preview-at-point-mode))
 
 ;;; Development Tools & Features
 
@@ -457,7 +477,6 @@
   ;; Emmet for fast HTML/CSS writing
   (use-package emmet-mode
     :hook (web-mode . emmet-mode))
-  kj
 
 ;;;; data work formats
 
@@ -482,19 +501,90 @@
 
 ;;; Org Mode Configuration
 
-  (use-package org
-    :config
-    (setq org-confirm-babel-evaluate nil)
-    ;; Enable code blocks for languages you use
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((python . t)
-       (R . t)
-       (emacs-lisp . t)))
+    (use-package org
 
-    ;; Nice bullets instead of asterisks
-    (use-package org-bullets
-      :hook (org-mode . org-bullets-mode)))
+      :config
+      (setq org-confirm-babel-evaluate nil)
+      ;; Enable code blocks for languages you use
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((python . t)
+         (R . t)
+         (emacs-lisp . t)))
+
+ ;; src block templates
+      (setq org-structure-template-alist
+	    '(("s" . "src")
+        
+              ;; Emacs Lisp
+              ("e" . "src emacs-lisp")
+              ("E" . "src emacs-lisp :results value code :lexical t")
+        
+              ;; Python
+              ("p" . "src python")
+              ("po" . "src python :results output")
+              ("ps" . "src python :session :results output")
+        
+              ;; R
+              ("r" . "src R")
+              ("ro" . "src R :results output")
+              ("rp" . "src R :results output graphics file :file plot.png")
+              ("rs" . "src R :session")
+        
+              ;; Bash
+              ("b" . "src bash")
+              ("sh" . "src sh :results output")
+        
+              ;; Documentation
+              ("x" . "example")
+              ("q" . "quote")
+              ("v" . "verse")))
+
+      
+;; Capture templates
+      (setq org-capture-templates
+       '(
+	 ("i" "Inbox" entry
+         (file+headline "~/Documents/notes/inbox.org" "Inbox")
+           "* %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n"
+           :empty-lines 1)
+          
+          ("t" "Todo" entry
+           (file+headline "~/Documents/notes/tasks.org" "Tasks")
+           "* TODO  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
+           :empty-lines 1)))
+  
+  ;; Agenda files
+      (setq org-agenda-files '("~/Documents/notes"))
+  
+  ;; Global keybindings
+      (global-set-key (kbd "C-c c") 'org-capture)
+      (global-set-key (kbd "C-c a") 'org-agenda)
+      (global-set-key (kbd "C-c l") 'org-store-link)
+
+      :custom
+      (org-startup-indented t)
+      (org-M-RET-may-split-line '((default . nil)))
+      (org-insert-heading-respect-content t)
+      (org-hide-emphasis-markers t)
+      (org-startup-with-inline-images t)
+      (org-image-actual-width '(450))
+      (org-pretty-entities t)
+      (org-use-sub-superscripts "{}")
+      (org-id-link-to-org-use-id t)
+      (org-fold-catch-invisible-edits))
+     
+      ;; Nice bullets instead of asterisks
+     (use-package org-bullets
+       :hook (org-mode . org-bullets-mode))
+
+(use-package org-modern
+  :hook
+  (org-mode . org-modern-mode))
+
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/Documents/notes/tasks.org" "Tasks")
+         "* TODO %?\n  %i\n  %a")))
 
 ;;; General Settings
 
@@ -613,9 +703,32 @@
 
     (dired-preview-global-mode 1))
 
-;;; Denote
+(use-package bibtex
+  :custom
+  (bibtex-user-optional-fields
+   '(("keywords" "Keywords to describe the entry" "")
+     ("file"     "Relative or absolute path to attachments" "" )))
+  (bibtex-align-at-equal-sign t)
+  :config
+  (ews-bibtex-register)
+  :bind
+  (("C-c b r" . ews-bibtex-register)))
 
-  (use-package denote
+;; Biblio package for adding BibTeX records
+
+(use-package biblio
+  :bind
+  (("C-c b b" . ews-bibtex-biblio-lookup)))
+
+;; Citar to access bibliographies
+
+(use-package citar
+  :defer t
+  :custom
+  (citar-bibliography ews-bibtex-files))
+
+;;; Denote
+ (use-package denote
     :custom
     (denote-sort-keywords t)
     (denote-link-description-function #'ews-denote-link-description-title-case)
@@ -648,6 +761,15 @@
 
   ;; Consult-Notes for easy access to notes
 
+ (use-package consult-notes
+  :custom
+  (consult-notes-denote-display-keywords-indicator "_")
+  :bind
+  (("C-c d f" . consult-notes)
+   ("C-c d g" . consult-notes-search-in-all-notes))
+  :init
+ (consult-notes-denote-mode))
+
   (use-package consult-denote
     :ensure t
     :bind
@@ -673,23 +795,22 @@
      ("C-c n b d" . citar-denote-dwim)
      ("C-c n b e" . citar-denote-open-reference-entry)))
 
-  ;; Distraction-free writing
-
-  (use-package olivetti
-    :demand t
-    :bind
-    (("C-c w o" . ews-olivetti)))
-
-  ;; ediff
-
-  (use-package ediff
-    :straight nil
-    :custom
-    (ediff-keep-variants nil)
-    (ediff-split-window-function 'split-window-horizontally)
-    (ediff-window-setup-function 'ediff-setup-windows-plain))
-
 ;;; content
+    ;; Distraction-free writing
+
+    (use-package olivetti
+      :demand t
+      :bind
+      (("C-c o" . ews-olivetti)))
+
+    ;; ediff
+
+    (use-package ediff
+      :straight nil
+      :custom
+      (ediff-keep-variants nil)
+      (ediff-split-window-function 'split-window-horizontally)
+      (ediff-window-setup-function 'ediff-setup-windows-plain))
 
   ;; Doc-View
 
