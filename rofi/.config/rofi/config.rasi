@@ -160,4 +160,4 @@ configuration {
 
 //theme import
 
-@theme ".config/rofi/themes/square-green.rasi"
+@theme "/themes/square-green.rasi"

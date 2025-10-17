@@ -2,7 +2,7 @@
 /* Author: Newman Sanchez (https://github.com/newmanls) */
 
 * {
-    font:   "CommitMono Nerd Font Medium 12";
+    font:   "3270 Nerd Font Propo 14";
 
     bg0:     #2B3339;
     bg1:     #323D43;
