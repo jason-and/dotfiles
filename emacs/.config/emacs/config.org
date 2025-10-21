@@ -641,11 +641,11 @@
          '(
   	 ("i" "Inbox" entry
            (file+headline "~/Documents/notes/inbox.org" "Inbox")
-             "* %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n"
+             "* %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
              :empty-lines 1)
             
             ("t" "Todo" entry
-             (file+headline "~/Documents/notes/tasks.org" "Tasks")
+             (file+headline "~/Documents/notes/inbox.org" "Tasks")
              "* TODO  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
              :empty-lines 1)))
     
@@ -667,6 +667,7 @@
         (org-pretty-entities t)
         (org-use-sub-superscripts "{}")
         (org-id-link-to-org-use-id t)
+        (org-return-follows-link t)
         (org-fold-catch-invisible-edits))
        
         ;; Nice bullets instead of asterisks
@@ -678,15 +679,6 @@
     (org-mode . org-modern-mode))
 #+END_SRC
 
-** Org Capture
-:PROPERTIES:
-:ID:       ea4a545c-6fab-4e48-b6b2-087d2c29324d
-:END:
-#+BEGIN_SRC emacs-lisp
-(setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/Documents/notes/tasks.org" "Tasks")
-         "* TODO %?\n  %i\n  %a")))
-#+END_SRC
 * General Settings
 :PROPERTIES:
 :ID:       0a71ffd7-e5e0-4346-99f6-41f77280709c
@@ -867,10 +859,10 @@
       :config
       (setq denote-directory (expand-file-name "~/Documents/notes/"))
       (denote-rename-buffer-mode 1)
-      (setq denote-prompts '(title keywords))
+      (setq denote-prompts '(title keywords signature))
       (setq denote-infer-keywords t)
       (setq denote-sort-keywords t)
-      (setq denote-file-type 'markdown))
+      (setq denote-file-type 'org))
 
     (use-package denote-org
       :bind
@@ -889,20 +881,40 @@
     (("C-c d f" . consult-notes)
      ("C-c d g" . consult-notes-search-in-all-notes))
     :init
-   (consult-notes-denote-mode))
-  
-    (use-package consult-denote
+    (consult-notes-denote-mode))
+
+   (use-package consult-denote
       :ensure t
       :bind
       (("C-c n f" . consult-denote-find)
        ("C-c n g" . consult-denote-grep))
       :config
       (consult-denote-mode 1))
-
+(use-package denote-sequence
+  :ensure t
+  :bind
+  ( :map global-map
+    ;; Here we make "C-c n s" a prefix for all "[n]otes with [s]equence".
+    ;; This is just for demonstration purposes: use the key bindings
+    ;; that work for you.  Also check the commands:
+    ;;
+    ;; - `denote-sequence-new-parent'
+    ;; - `denote-sequence-new-sibling'
+    ;; - `denote-sequence-new-child'
+    ;; - `denote-sequence-new-child-of-current'
+    ;; - `denote-sequence-new-sibling-of-current'
+    ("C-c n s s" . denote-sequence)
+    ("C-c n s f" . denote-sequence-find)
+    ("C-c n s l" . denote-sequence-link)
+    ("C-c n s d" . denote-sequence-dired)
+    ("C-c n s r" . denote-sequence-reparent)
+    ("C-c n s c" . denote-sequence-convert)))
+ 
     ;; Citar-Denote to manage literature notes
 
     (use-package citar-denote
       :custom
+      (citar-bibliography '("~/Documents/library/all.bib"))
       (citar-open-always-create-notes t)
       :init
       (citar-denote-mode)
