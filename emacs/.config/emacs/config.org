@@ -322,12 +322,16 @@
     (setq completions-max-height 20))
 
   ;; similar to Prot's MCT package
-  (unless (version< emacs-version "29.0")
     (setq completion-auto-help 'always
           completion-auto-select 'second-tab
           completion-show-help nil
           completions-sort nil
-          completions-header-format nil))
+          completions-header-format nil)
+
+  (file-name-shadow-mode 1)
+
+  (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
+
 #+END_SRC
 ** Consult, Corfu, and Embark
 :PROPERTIES:
