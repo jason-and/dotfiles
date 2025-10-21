@@ -272,6 +272,10 @@
         completions-sort nil
         completions-header-format nil))
 
+(file-name-shadow-mode 1)
+
+(add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
+
 ;; Enhanced command, buffer, and file selection
   (use-package consult
     :bind (("C-x b" . consult-buffer)
@@ -546,11 +550,11 @@
        '(
 	 ("i" "Inbox" entry
          (file+headline "~/Documents/notes/inbox.org" "Inbox")
-           "* %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n"
+           "* %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
            :empty-lines 1)
           
           ("t" "Todo" entry
-           (file+headline "~/Documents/notes/tasks.org" "Tasks")
+           (file+headline "~/Documents/notes/inbox.org" "Tasks")
            "* TODO  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
            :empty-lines 1)))
   
@@ -572,6 +576,7 @@
       (org-pretty-entities t)
       (org-use-sub-superscripts "{}")
       (org-id-link-to-org-use-id t)
+      (org-return-follows-link t)
       (org-fold-catch-invisible-edits))
      
       ;; Nice bullets instead of asterisks
@@ -581,10 +586,6 @@
 (use-package org-modern
   :hook
   (org-mode . org-modern-mode))
-
-(setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/Documents/notes/tasks.org" "Tasks")
-         "* TODO %?\n  %i\n  %a")))
 
 ;;; General Settings
 
@@ -728,72 +729,92 @@
   (citar-bibliography ews-bibtex-files))
 
 ;;; Denote
- (use-package denote
+   (use-package denote
+      :custom
+      (denote-sort-keywords t)
+      (denote-link-description-function #'ews-denote-link-description-title-case)
+      :hook
+      (dired-mode . denote-dired-mode)
+      :custom-face
+      (denote-faces-link ((t (:slant italic))))
+      :bind
+      (("C-c n n" . denote)
+       ("C-c n r" . denote-rename-file)
+       ("C-c n l" . denote-link)
+       ("C-c n b" . denote-backlinks)
+       ("C-c n d" . denote-dired)
+       ("C-c n g" . denote-grep))
+      :config
+      (setq denote-directory (expand-file-name "~/Documents/notes/"))
+      (denote-rename-buffer-mode 1)
+      (setq denote-prompts '(title keywords signature))
+      (setq denote-infer-keywords t)
+      (setq denote-sort-keywords t)
+      (setq denote-file-type 'org))
+
+    (use-package denote-org
+      :bind
+      (("C-c n d h" . denote-org-link-to-heading)
+       ("C-c n d s" . denote-org-extract-subtree)))
+
+    (use-package denote-markdown
+      :ensure t)
+
+    ;; Consult-Notes for easy access to notes
+
+   (use-package consult-notes
     :custom
-    (denote-sort-keywords t)
-    (denote-link-description-function #'ews-denote-link-description-title-case)
-    :hook
-    (dired-mode . denote-dired-mode)
-    :custom-face
-    (denote-faces-link ((t (:slant italic))))
+    (consult-notes-denote-display-keywords-indicator "_")
     :bind
-    (("C-c n n" . denote)
-     ("C-c n r" . denote-rename-file)
-     ("C-c n l" . denote-link)
-     ("C-c n b" . denote-backlinks)
-     ("C-c n d" . denote-dired)
-     ("C-c n g" . denote-grep))
-    :config
-    (setq denote-directory (expand-file-name "~/Documents/notes/"))
-    (denote-rename-buffer-mode 1)
-    (setq denote-prompts '(title keywords))
-    (setq denote-infer-keywords t)
-    (setq denote-sort-keywords t)
-    (setq denote-file-type 'markdown))
-
-  (use-package denote-org
-    :bind
-    (("C-c n d h" . denote-org-link-to-heading)
-     ("C-c n d s" . denote-org-extract-subtree)))
-
-  (use-package denote-markdown
-    :ensure t)
-
-  ;; Consult-Notes for easy access to notes
-
- (use-package consult-notes
-  :custom
-  (consult-notes-denote-display-keywords-indicator "_")
-  :bind
-  (("C-c d f" . consult-notes)
-   ("C-c d g" . consult-notes-search-in-all-notes))
-  :init
- (consult-notes-denote-mode))
-
-  (use-package consult-denote
-    :ensure t
-    :bind
-    (("C-c n f" . consult-denote-find)
-     ("C-c n g" . consult-denote-grep))
-    :config
-    (consult-denote-mode 1))
-
-  ;; Citar-Denote to manage literature notes
-
-  (use-package citar-denote
-    :custom
-    (citar-open-always-create-notes t)
+    (("C-c d f" . consult-notes)
+     ("C-c d g" . consult-notes-search-in-all-notes))
     :init
-    (citar-denote-mode)
-    :bind
-    (("C-c n b c" . citar-create-note)
-     ("C-c n b n" . citar-denote-open-note)
-     ("C-c n b x" . citar-denote-nocite)
-     :map org-mode-map
-     ("C-c n b k" . citar-denote-add-citekey)
-     ("C-c n b K" . citar-denote-remove-citekey)
-     ("C-c n b d" . citar-denote-dwim)
-     ("C-c n b e" . citar-denote-open-reference-entry)))
+    (consult-notes-denote-mode))
+
+   (use-package consult-denote
+      :ensure t
+      :bind
+      (("C-c n f" . consult-denote-find)
+       ("C-c n g" . consult-denote-grep))
+      :config
+      (consult-denote-mode 1))
+(use-package denote-sequence
+  :ensure t
+  :bind
+  ( :map global-map
+    ;; Here we make "C-c n s" a prefix for all "[n]otes with [s]equence".
+    ;; This is just for demonstration purposes: use the key bindings
+    ;; that work for you.  Also check the commands:
+    ;;
+    ;; - `denote-sequence-new-parent'
+    ;; - `denote-sequence-new-sibling'
+    ;; - `denote-sequence-new-child'
+    ;; - `denote-sequence-new-child-of-current'
+    ;; - `denote-sequence-new-sibling-of-current'
+    ("C-c n s s" . denote-sequence)
+    ("C-c n s f" . denote-sequence-find)
+    ("C-c n s l" . denote-sequence-link)
+    ("C-c n s d" . denote-sequence-dired)
+    ("C-c n s r" . denote-sequence-reparent)
+    ("C-c n s c" . denote-sequence-convert)))
+ 
+    ;; Citar-Denote to manage literature notes
+
+    (use-package citar-denote
+      :custom
+      (citar-bibliography '("~/Documents/library/all.bib"))
+      (citar-open-always-create-notes t)
+      :init
+      (citar-denote-mode)
+      :bind
+      (("C-c n b c" . citar-create-note)
+       ("C-c n b n" . citar-denote-open-note)
+       ("C-c n b x" . citar-denote-nocite)
+       :map org-mode-map
+       ("C-c n b k" . citar-denote-add-citekey)
+       ("C-c n b K" . citar-denote-remove-citekey)
+       ("C-c n b d" . citar-denote-dwim)
+       ("C-c n b e" . citar-denote-open-reference-entry)))
 
 ;;; content
     ;; Distraction-free writing
