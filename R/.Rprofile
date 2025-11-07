@@ -60,3 +60,28 @@ options(radian.vi_mode_prompt = "\033[0;34m[{}]\033[0m ")
 
 # highlight matching bracket
 options(radian.highlight_matching_bracket = TRUE)
+.First <- function() {
+  options(width = 120)
+  options(max.print = 200)
+
+  # Better tibble display if available
+  if (requireNamespace("tibble", quietly = TRUE)) {
+    options(pillar.width = Inf)
+    options(tibble.print_max = 20)
+  }
+
+  # Convenient view function
+  view <- function(x) {
+    if (is.data.frame(x) || is.matrix(x)) {
+      if (requireNamespace("tibble", quietly = TRUE)) {
+        print(tibble::as_tibble(x))
+      } else {
+        print(x)
+      }
+    } else {
+      print(x)
+    }
+  }
+
+  invisible()
+}

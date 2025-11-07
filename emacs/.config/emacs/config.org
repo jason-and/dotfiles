@@ -60,6 +60,37 @@
 #+BEGIN_SRC emacs-lisp
 ;;;Core System Settings
 
+;; use zshell
+(use-package exec-path-from-shell
+  :config
+  (setq exec-path-from-shell-shell-name "/usr/bin/zsh")
+  (when (daemonp)
+    (exec-path-from-shell-initialize)))
+
+;; Use zsh for shell commands
+(setq shell-file-name "/usr/bin/zsh")
+(setq explicit-shell-file-name "/usr/bin/zsh")
+
+
+;; ansi colors in terminals and such
+(use-package ansi-color
+  :straight nil
+  :config
+  ;; For compilation/shell command buffers
+  (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+  
+  ;; Also handle colors in shell-mode if you use M-x shell
+  (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on))
+
+;; Make shell command output buffers easier to read
+(with-eval-after-load 'compile
+  ;; Automatically scroll to show new output
+  (setq compilation-scroll-output t)
+  
+  ;; Don't ask to kill the buffer when running new command
+  (setq compilation-always-kill t))
+
+
   (setq use-short-answers t)
 
   (setq confirm-kill-emacs 'yes-or-no-p)
@@ -145,7 +176,7 @@
             "Output\\*$"
             "\\*Async Shell Command\\*"
             help-mode
-  	  helpful-mode
+	    helpful-mode
             compilation-mode))
     (popper-mode +1)
     (popper-echo-mode +1))                ; For echo area hints
@@ -165,10 +196,10 @@
     :config
     (mapc #'disable-theme custom-enabled-themes)
     (setq modus-themes-italic-constructs t
-  	 modus-themes-bold-constructs t)
+   	modus-themes-bold-constructs t)
     (modus-themes-include-derivatives-mode 1)
 
-  (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+    (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 
   (use-package ef-themes
     :ensure t
@@ -177,6 +208,19 @@
     (load-theme 'ef-day :no-confirm-loading))
 
   (use-package doric-themes)
+
+  (use-package theme-buffet
+    :after (modus-themes ef-themes doric-themes)  ; add your favorite themes here
+    :init
+    :functions calendar-current-time-zone
+    theme-buffet-modus-ef theme-buffet-timer-hours
+    :config
+    (require 'cal-dst)
+    (setopt theme-buffet-time-offset
+            (1+ (/ (cadr (calendar-current-time-zone)) 60)))
+     (theme-buffet-timer-hours 1)
+    (theme-buffet-modus-ef)
+    (theme-buffet-mode 1))
 
   (use-package nerd-icons)
 
@@ -198,7 +242,7 @@
     :straight t
     :config
     (setq spacious-padding-subtle-frame-lines
-    	`( :mode-line-active 'default
+     	`( :mode-line-active 'default
              :mode-line-inactive vertical-border))
     :custom
     (line-spacing 3)
@@ -208,28 +252,106 @@
   (show-paren-mode 1)
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
+#+END_SRC
 
-  ;;font
-  (let ((mono-spaced-font "CommitMono Nerd Font Mono")
-        (proportionately-spaced-font "CommitMono Nerd Font"))
-    (set-face-attribute 'default nil :family mono-spaced-font :height 150)
-    (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
-    (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
+** font
+:PROPERTIES:
+:ID:       7a6d640f-a783-4620-8c01-fda95d850d34
+:END:
+#+BEGIN_SRC emacs-lisp
+(use-package fontaine
+  :straight t
+  :init
+  ;; Set the state file location BEFORE the package loads
+  (setq fontaine-latest-state-file
+        (locate-user-emacs-file "fontaine-latest-state.eld"))
+  
+  :config
+  ;; Configure presets AFTER the package loads
+  (setq fontaine-presets
+        '((small
+           :default-family "Aporetic Serif Mono"
+           :default-height 80
+           :variable-pitch-family "Aporetic Sans")
+          (regular) ; uses all fallback values and is named `regular'
+          (medium
+           :default-weight semilight
+           :default-height 115
+           :bold-weight extrabold)
+          (large
+           :inherit medium
+           :default-height 140)
+          (presentation
+           :default-height 180)
+          (t
+           ;; Default preset with all properties
+           :default-family "Aporetic Sans Mono"
+           :default-weight regular
+           :default-height 100
 
-  (when (display-graphic-p)
-    (context-menu-mode))
+           :fixed-pitch-family nil ; falls back to :default-family
+           :fixed-pitch-weight nil ; falls back to :default-weight
+           :fixed-pitch-height 1.0
 
-  (use-package mixed-pitch
-    :hook
-    (org-mode . mixed-pitch-mode))
+           :fixed-pitch-serif-family nil
+           :fixed-pitch-serif-weight nil
+           :fixed-pitch-serif-height 1.0
 
-  (use-package show-font
-    :ensure t
-    :bind
-    (("C-c s f" . show-font-select-preview)
-     ("C-c s t" . show-font-tabulated)))
+           :variable-pitch-family "Aporetic Serif"
+           :variable-pitch-weight nil
+           :variable-pitch-height 1.0
+
+           :mode-line-active-family nil
+           :mode-line-active-weight nil
+           :mode-line-active-height 0.9
+
+           :mode-line-inactive-family nil
+           :mode-line-inactive-weight nil
+           :mode-line-inactive-height 0.9
+
+           :header-line-family nil
+           :header-line-weight nil
+           :header-line-height 0.9
+
+           :line-number-family nil
+           :line-number-weight nil
+           :line-number-height 0.9
+
+           :tab-bar-family nil
+           :tab-bar-weight nil
+           :tab-bar-height 1.0
+
+           :tab-line-family nil
+           :tab-line-weight nil
+           :tab-line-height 1.0
+
+           :bold-family nil
+           :bold-weight bold
+
+           :italic-family nil
+           :italic-slant italic
+
+           :line-spacing nil)))
+
+  ;; Set the initial preset
+  (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+
+  ;; Enable fontaine-mode to persist settings
+  (fontaine-mode 1)
+
+  :bind ("C-c f" . fontaine-set-preset))
+
+(use-package show-font
+  :ensure t
+  :bind
+  (("C-c s f" . show-font-select-preview)
+   ("C-c s t" . show-font-tabulated)))
 
 #+END_SRC
+
+#+RESULTS:
+: fontaine-set-preset
+
 * Evil Mode (Vim Emulation)
 :PROPERTIES:
 :ID:       1e116fd6-7265-4aa8-a377-41f8203de5b6
@@ -611,7 +733,7 @@
            (R . t)
            (emacs-lisp . t)))
 
-   ;; src block templates
+	;; src block templates
         (setq org-structure-template-alist
   	    '(("s" . "src")
           
@@ -625,10 +747,8 @@
                 ("ps" . "src python :session :results output")
           
                 ;; R
-                ("r" . "src R")
-                ("ro" . "src R :results output")
-                ("rp" . "src R :results output graphics file :file plot.png")
-                ("rs" . "src R :session")
+                ("r" . "src R\n")
+                ("rp" . "src R :results output graphics file :file plot.png\n\n")
           
                 ;; Bash
                 ("b" . "src bash")
@@ -639,13 +759,24 @@
                 ("q" . "quote")
                 ("v" . "verse")))
 
+        (setq org-babel-default-header-args:R
+        '((:session . "*R*")           ; Use persistent R session by default
+          (:results . "output")         ; Show R console output
+          (:exports . "both")           ; Export both code and results
+          (:cache . "no")               ; Don't cache results (for interactive work)
+          (:prologue . "options(crayon.enabled = FALSE, cli.num_colors = 1)")
+          (:tangle . "no")))
+        
+        (setq org-src-fontify-natively t
+  	    org-src-tab-acts-natively t
+  	    org-src-preserve-indentation t)
         
   ;; Capture templates
         (setq org-capture-templates
          '(
   	 ("i" "Inbox" entry
            (file+headline "~/Documents/notes/inbox.org" "Inbox")
-             "* %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
+             "*  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
              :empty-lines 1)
             
             ("t" "Todo" entry
@@ -672,11 +803,24 @@
         (org-use-sub-superscripts "{}")
         (org-id-link-to-org-use-id t)
         (org-return-follows-link t)
-        (org-fold-catch-invisible-edits))
+        (org-fold-catch-invisible-edits t))
        
         ;; Nice bullets instead of asterisks
        (use-package org-bullets
          :hook (org-mode . org-bullets-mode))
+
+;; get rid of ansi characters in output of R Babel blocks
+(defun my/babel-ansi-colorize-results ()
+  "Apply ANSI color escape sequences to Org Babel results."
+  (when-let ((beg (org-babel-where-is-src-block-result nil nil)))
+    (save-excursion
+      (goto-char beg)
+      (when (looking-at org-babel-result-regexp)
+        (let ((end (org-babel-result-end))
+              (ansi-color-context-region nil))
+          (ansi-color-apply-on-region beg end))))))
+
+(add-hook 'org-babel-after-execute-hook 'my/babel-ansi-colorize-results)
 
   (use-package org-modern
     :hook
@@ -770,6 +914,7 @@
     (setq dired-recursive-copies 'always)
     (setq dired-recursive-deletes 'always)
     (setq delete-by-moving-to-trash t)
+    (setq dired-listing-switches "-AGFhlv --group-directories-first --time-style=long-iso")
     (setq dired-dwim-target t))
 
   (use-package dired-subtree
@@ -795,7 +940,7 @@
     :after dired 
     :config
     (setq dired-preview-delay 0.7)
-    (setq dired-preview-max-size (expt 2 20))
+    (setq dired-preview-max-size (expt 2 25))
     (setq dired-preview-ignored-extensions-regexp
           (concat "\\."
                   "\\(gz\\|"
@@ -805,6 +950,7 @@
                   "rar\\|"
                   "zip\\|"
                   "iso\\|"
+                  "RAF\\|"
                   "epub"
                   "\\)"))
 
@@ -962,7 +1108,7 @@
     (doc-view-resolution 300)
     (large-file-warning-threshold (* 50 (expt 2 20))))
 
-  ;; Read ePub files
+;; Read ePub files
 
   (use-package nov
     :init

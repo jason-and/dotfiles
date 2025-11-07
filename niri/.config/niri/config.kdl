@@ -108,6 +108,8 @@ output "HDMI-A-1" {
 
 spawn-at-startup "swww-daemon"
 spawn-at-startup "nm-applet" "--indicator"
+spawn-at-startup "emacsclient" "-n" "-c"
+
 
 layout {
     // Set gaps around windows in logical pixels.
@@ -137,7 +139,7 @@ preset-column-widths {
         //  off
 
         // How many logical pixels the ring extends out from the windows.
-        width 2
+        width 1
 
         // Colors can be set in a variety of ways:
         // - CSS named colors: "red"
@@ -145,9 +147,10 @@ preset-column-widths {
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
         // Color of the ring on the active monitor.
-        active-color "#a3ebb1"
+       //active-color "#a3ebb1"
+         active-color "#CFCAD6"
 
-        // Color of the ring on inactive monitors.
+// Color of the ring on inactive monitors.
         inactive-color "#6c7086"
 
         // You can also use gradients. They take precedence over solid colors.
@@ -185,21 +188,22 @@ preset-column-widths {
 
     // You can enable drop shadows for windows.
     shadow {
-        // Uncomment the next line to enable shadows.
         on
 
         // Softness controls the shadow blur radius.
-        softness 30
+        softness 8 
 
         // Spread expands the shadow.
-        spread 5
+        spread 2
 
         // Offset moves the shadow relative to the window.
-        offset x=0 y=5
+        offset x=3 y=-4
 
         // You can also change the shadow color and opacity.
-        color "#0007"
-    }
+        color "#000009"
+
+	draw-behind-window true
+	}
 }
 
 
@@ -230,7 +234,7 @@ window-rule {
 
 // Development setup
 window-rule {
-    match app-id=r#"^(code|neovim|emacs)$"#
+    match app-id=r#"^(code|neovim)$"#
     default-column-width { proportion 0.6; }
 }
 
@@ -329,10 +333,11 @@ binds {
 
     Mod+Return hotkey-overlay-title="Open a Terminal: wezterm" { spawn "wezterm"; }
     Mod+space hotkey-overlay-title="Run an Application: Rofi" { spawn "rofi" "-show" "drun" "-show-icons"; }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
+    // Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
     Mod+B hotkey-overlay-title="Open Browser" { spawn "zen-browser"; }
     Mod+E { spawn "dolphin"; }  // File manager
-    Mod+N { spawn "emacsclient" "-n" "-c"; } 
+    Mod+N { spawn "emacsclient" "-n" "-c"; }
+    Mod+P { spawn "~/.local/bin/photo_menu.sh"; }
    // TODO make this a toggle in a bashscript
     XF86Favorites { spawn "gammastep" "-O" "3600" "&"; }
     

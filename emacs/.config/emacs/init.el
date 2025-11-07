@@ -1,45 +1,76 @@
-;; -*- lexical-binding: t; -*-
-;; Restore reasonable GC settings after startup
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (setq gc-cons-threshold (* 2 1000 1000)) ;; 2MB
-            (setq gc-cons-percentage 0.1)
-            
-            ;; Show startup time
-            (message "Emacs loaded in %s with %d garbage collections."
-                     (format "%.2f seconds"
-                             (float-time (time-subtract after-init-time before-init-time)))
-                     gcs-done)))
+  ;; -*- lexical-binding: t; -*-
+  ;; Restore reasonable GC settings after startup
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (setq gc-cons-threshold (* 2 1000 1000)) ;; 2MB
+              (setq gc-cons-percentage 0.1)
+              
+              ;; Show startup time
+              (message "Emacs loaded in %s with %d garbage collections."
+                       (format "%.2f seconds"
+                               (float-time (time-subtract after-init-time before-init-time)))
+                       gcs-done)))
 
-;;;Bootstrap straight.el
+  ;;;Bootstrap straight.el
 
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 6))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
+    (defvar bootstrap-version)
+    (let ((bootstrap-file
+           (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+          (bootstrap-version 6))
+      (unless (file-exists-p bootstrap-file)
+        (with-current-buffer
+            (url-retrieve-synchronously
+             "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+             'silent 'inhibit-cookies)
+          (goto-char (point-max))
+          (eval-print-last-sexp)))
+      (load bootstrap-file nil 'nomessage))
 
-;; Configure use-package to use straight.el by default
+  ;; Configure use-package to use straight.el by default
 
-  (straight-use-package 'use-package)
-  (setq straight-use-package-by-default t)
+    (straight-use-package 'use-package)
+    (setq straight-use-package-by-default t)
 
 
-  ;; stop warnings when installing packages
+    ;; stop warnings when installing packages
 
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
-                 (display-buffer-no-window)
-                 (allow-no-window . t)))
+    (add-to-list 'display-buffer-alist
+                 '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
+                   (display-buffer-no-window)
+                   (allow-no-window . t)))
 
 ;;;Core System Settings
+
+;; use zshell
+(use-package exec-path-from-shell
+  :config
+  (setq exec-path-from-shell-shell-name "/usr/bin/zsh")
+  (when (daemonp)
+    (exec-path-from-shell-initialize)))
+
+;; Use zsh for shell commands
+(setq shell-file-name "/usr/bin/zsh")
+(setq explicit-shell-file-name "/usr/bin/zsh")
+
+
+;; ansi colors in terminals and such
+(use-package ansi-color
+  :straight nil
+  :config
+  ;; For compilation/shell command buffers
+  (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+  
+  ;; Also handle colors in shell-mode if you use M-x shell
+  (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on))
+
+;; Make shell command output buffers easier to read
+(with-eval-after-load 'compile
+  ;; Automatically scroll to show new output
+  (setq compilation-scroll-output t)
+  
+  ;; Don't ask to kill the buffer when running new command
+  (setq compilation-always-kill t))
+
 
   (setq use-short-answers t)
 
@@ -69,119 +100,200 @@
     :straight nil
     :load-path "~/.config/emacs/")
 
-;;; Core UI Configuration
+  ;;; Core UI Configuration
 
-;; Basic UI settings
-(column-number-mode 1)
-(global-display-line-numbers-mode 1)
-(setq display-line-numbers-type 'relative) ;; Vim-like relative line numbers
+  ;; Basic UI settings
+  (column-number-mode 1)
+  (global-display-line-numbers-mode 1)
+  (setq display-line-numbers-type 'relative) ;; Vim-like relative line numbers
 
-;;line highlighting
-;;enable it for all programming major modes
-(add-hook 'prog-mode-hook #'hl-line-mode)
-;;and for all modes derived from text-mode
-(add-hook 'text-mode-hook #'hl-line-mode)
+  ;;line highlighting
+  ;;enable it for all programming major modes
+  (add-hook 'prog-mode-hook #'hl-line-mode)
+  ;;and for all modes derived from text-mode
+  (add-hook 'text-mode-hook #'hl-line-mode)
 
 
-;; disable line numbers in certain modes
-(dolist (mode '(org-mode-hook
-  		term-mode-hook
-  		vterm-mode-hook
-  		R-mode-hook
-  		eshell-mode-hook
-  		eww-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  ;; disable line numbers in certain modes
+  (dolist (mode '(org-mode-hook
+    		term-mode-hook
+    		vterm-mode-hook
+    		R-mode-hook
+    		eshell-mode-hook
+    		eww-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-(setq visible-bell t            ; flash the bell rings
-      use-dialog-box nil)       ; no dialog boxes
+  (setq visible-bell t            ; flash the bell rings
+        use-dialog-box nil)       ; no dialog boxes
 
-;; Split windows sensibly
+  ;; Split windows sensibly
 
-(setq split-width-threshold 120
-      split-height-threshold nil)
+  (setq split-width-threshold 120
+        split-height-threshold nil)
 
-(use-package balanced-windows
-  :config
-  (balanced-windows-mode 1))
+  (use-package balanced-windows
+    :config
+    (balanced-windows-mode 1))
 
-(use-package popper
+  (use-package popper
+    :straight t
+    :bind (("C-`"   . popper-toggle)
+           ("M-`"   . popper-cycle)
+           ("C-M-`" . popper-toggle-type))
+    :init
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "Output\\*$"
+            "\\*Async Shell Command\\*"
+            help-mode
+	    helpful-mode
+            compilation-mode))
+    (popper-mode +1)
+    (popper-echo-mode +1))                ; For echo area hints
+
+  (use-package modus-themes
+    :ensure t
+    :config
+    (mapc #'disable-theme custom-enabled-themes)
+    (setq modus-themes-italic-constructs t
+   	modus-themes-bold-constructs t)
+    (modus-themes-include-derivatives-mode 1)
+
+    (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+
+  (use-package ef-themes
+    :ensure t
+    :config
+    (setq ef-themes-to-toggle '(ef-day ef-owl))
+    (load-theme 'ef-day :no-confirm-loading))
+
+  (use-package doric-themes)
+
+  (use-package theme-buffet
+    :after (modus-themes ef-themes doric-themes)  ; add your favorite themes here
+    :init
+    :functions calendar-current-time-zone
+    theme-buffet-modus-ef theme-buffet-timer-hours
+    :config
+    (require 'cal-dst)
+    (setopt theme-buffet-time-offset
+            (1+ (/ (cadr (calendar-current-time-zone)) 60)))
+     (theme-buffet-timer-hours 1)
+    (theme-buffet-modus-ef)
+    (theme-buffet-mode 1))
+
+  (use-package nerd-icons)
+
+  (use-package nerd-icons-completion
+    :after marginalia
+    :config
+    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+
+  (use-package nerd-icons-corfu
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+  (use-package nerd-icons-dired
+    :hook
+    (dired-mode . nerd-icons-dired-mode))
+
+  (use-package spacious-padding
+    :straight t
+    :config
+    (setq spacious-padding-subtle-frame-lines
+     	`( :mode-line-active 'default
+             :mode-line-inactive vertical-border))
+    :custom
+    (line-spacing 3)
+    (spacious-padding-mode 1))
+
+  ;; Highlight matching parentheses
+  (show-paren-mode 1)
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package fontaine
   :straight t
-  :bind (("C-`"   . popper-toggle)
-         ("M-`"   . popper-cycle)
-         ("C-M-`" . popper-toggle-type))
   :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "Output\\*$"
-          "\\*Async Shell Command\\*"
-          help-mode
-	  helpful-mode
-          compilation-mode))
-  (popper-mode +1)
-  (popper-echo-mode +1))                ; For echo area hints
-
-(use-package modus-themes
-  :ensure t
+  ;; Set the state file location BEFORE the package loads
+  (setq fontaine-latest-state-file
+        (locate-user-emacs-file "fontaine-latest-state.eld"))
+  
   :config
-  (mapc #'disable-theme custom-enabled-themes)
-  (setq modus-themes-italic-constructs t
-	 modus-themes-bold-constructs t)
-  (modus-themes-include-derivatives-mode 1)
+  ;; Configure presets AFTER the package loads
+  (setq fontaine-presets
+        '((small
+           :default-family "Aporetic Serif Mono"
+           :default-height 80
+           :variable-pitch-family "Aporetic Sans")
+          (regular) ; uses all fallback values and is named `regular'
+          (medium
+           :default-weight semilight
+           :default-height 115
+           :bold-weight extrabold)
+          (large
+           :inherit medium
+           :default-height 140)
+          (presentation
+           :default-height 180)
+          (t
+           ;; Default preset with all properties
+           :default-family "Aporetic Sans Mono"
+           :default-weight regular
+           :default-height 100
 
-(define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+           :fixed-pitch-family nil ; falls back to :default-family
+           :fixed-pitch-weight nil ; falls back to :default-weight
+           :fixed-pitch-height 1.0
 
-(use-package ef-themes
-  :ensure t
-  :config
-  (setq ef-themes-to-toggle '(ef-day ef-owl))
-  (load-theme 'ef-day :no-confirm-loading))
+           :fixed-pitch-serif-family nil
+           :fixed-pitch-serif-weight nil
+           :fixed-pitch-serif-height 1.0
 
-(use-package doric-themes)
+           :variable-pitch-family "Aporetic Serif"
+           :variable-pitch-weight nil
+           :variable-pitch-height 1.0
 
-(use-package nerd-icons)
+           :mode-line-active-family nil
+           :mode-line-active-weight nil
+           :mode-line-active-height 0.9
 
-(use-package nerd-icons-completion
-  :after marginalia
-  :config
-  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+           :mode-line-inactive-family nil
+           :mode-line-inactive-weight nil
+           :mode-line-inactive-height 0.9
 
-(use-package nerd-icons-corfu
-  :after corfu
-  :config
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+           :header-line-family nil
+           :header-line-weight nil
+           :header-line-height 0.9
 
-(use-package nerd-icons-dired
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
+           :line-number-family nil
+           :line-number-weight nil
+           :line-number-height 0.9
 
-(use-package spacious-padding
-  :straight t
-  :config
-  (setq spacious-padding-subtle-frame-lines
-  	`( :mode-line-active 'default
-           :mode-line-inactive vertical-border))
-  :custom
-  (line-spacing 3)
-  (spacious-padding-mode 1))
+           :tab-bar-family nil
+           :tab-bar-weight nil
+           :tab-bar-height 1.0
 
-;; Highlight matching parentheses
-(show-paren-mode 1)
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+           :tab-line-family nil
+           :tab-line-weight nil
+           :tab-line-height 1.0
 
-;;font
-(let ((mono-spaced-font "CommitMono Nerd Font Mono")
-      (proportionately-spaced-font "CommitMono Nerd Font"))
-  (set-face-attribute 'default nil :family mono-spaced-font :height 150)
-  (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
-  (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
+           :bold-family nil
+           :bold-weight bold
 
-(when (display-graphic-p)
-  (context-menu-mode))
+           :italic-family nil
+           :italic-slant italic
 
-(use-package mixed-pitch
-  :hook
-  (org-mode . mixed-pitch-mode))
+           :line-spacing nil)))
+
+  ;; Set the initial preset
+  (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+
+  ;; Enable fontaine-mode to persist settings
+  (fontaine-mode 1)
+
+  :bind ("C-c f" . fontaine-set-preset))
 
 (use-package show-font
   :ensure t
@@ -222,142 +334,141 @@
     :config
     (evil-commentary-mode))
 
-;;; Which Key 
+  ;;; Which Key 
 
-  ;; Which Key for discovering keybinding;; s
-  (use-package which-key
-    :init
-    (setq which-key-idle-delay 0.3)
-    :config
-    (which-key-mode)
+    ;; Which Key for discovering keybinding;; s
+    (use-package which-key
+      :init
+      (setq which-key-idle-delay 0.3)
+      :config
+      (which-key-mode)
+      :custom
+      (which-key-max-description-length 40)
+      (which-key-lighter nil)
+      (which-key-sort-order 'which-key-description-order)
+      (which-key-setup-side-window-right-bottom))
+
+    (use-package keycast
+      :config
+      (keycast-mode)
+      (keycast-mode-line-mode))
+
+  ;;; Completion Framework
+  ;; minibuffer completion
+  (use-package vertico
+    :config (vertico-mode))
+
+  ;; vertico uses posframe (frame in center of screen)
+  (use-package vertico-posframe
+    :init(vertico-posframe-mode 1))
+
+  ;; adds helpful info about options in minibuffer
+  (use-package marginalia
+    :init (marginalia-mode))
+
+  (use-package orderless
     :custom
-    (which-key-max-description-length 40)
-    (which-key-lighter nil)
-    (which-key-sort-order 'which-key-description-order)
-    (which-key-setup-side-window-right-bottom))
+    (completion-styles '(orderless flex basic))
+    (completion-category-overrides '((file (styles basic partial-completion)))))
 
-  (use-package keycast
-    :config
-    (keycast-mode)
-    (keycast-mode-line-mode))
+  ;; one column that does not take up whole screen
+  (setq completions-format 'one-column)
+  (unless (version< emacs-version "29.0")
+    (setq completions-max-height 20))
 
-;;; Completion Framework
-;; minibuffer completion
-(use-package vertico
-  :config (vertico-mode))
+  ;; similar to Prot's MCT package
+    (setq completion-auto-help 'always
+          completion-auto-select 'second-tab
+          completion-show-help nil
+          completions-sort nil
+          completions-header-format nil)
 
-;; vertico uses posframe (frame in center of screen)
-(use-package vertico-posframe
-  :init(vertico-posframe-mode 1))
+  (file-name-shadow-mode 1)
 
-;; adds helpful info about options in minibuffer
-(use-package marginalia
-  :init (marginalia-mode))
+  (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
 
-(use-package orderless
-  :custom
-  (completion-styles '(orderless flex basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+      ;; Enhanced command, buffer, and file selection
+      (use-package consult
+        :bind (("C-x b" . consult-buffer)
+               ("C-x 4 b" . consult-buffer-other-window)
+               ("C-c s" . consult-ripgrep)
+               ("C-s" . consult-line)))
 
-;; one column that does not take up whole screen
-(setq completions-format 'one-column)
-(unless (version< emacs-version "29.0")
-  (setq completions-max-height 20))
+      (use-package savehist
+        :straight nil
+        :hook (after-init . savehist-mode))
 
-;; similar to Prot's MCT package
-(unless (version< emacs-version "29.0")
-  (setq completion-auto-help 'always
-        completion-auto-select 'second-tab
-        completion-show-help nil
-        completions-sort nil
-        completions-header-format nil))
+      (use-package corfu
+        :init (global-corfu-mode)
+        :bind (:map corfu-map ("<tab>" . corfu-complete))
+        :custom
+        (tab-always-indent 'complete)
+        (corfu-preview-current nil)
+        (corfu-min-width 20)
+        (corfu-auto t)
+        (corfu-auto-prefix 2)
+        (corfu-cycle t)
+        (setq corfu-popupinfo-delay '(1.25 . 0.5))
+        (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
 
-(file-name-shadow-mode 1)
-
-(add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
-
-;; Enhanced command, buffer, and file selection
-  (use-package consult
-    :bind (("C-x b" . consult-buffer)
-           ("C-x 4 b" . consult-buffer-other-window)
-           ("C-c s" . consult-ripgrep)
-           ("C-s" . consult-line)))
-
-  (use-package savehist
-    :straight nil
-    :hook (after-init . savehist-mode))
-
-  (use-package corfu
-    :init (global-corfu-mode)
-    :bind (:map corfu-map ("<tab>" . corfu-complete))
-    :custom
-    (tab-always-indent 'complete)
-    (corfu-preview-current nil)
-    (corfu-min-width 20)
-    (corfu-auto t)
-    (corfu-auto-prefix 2)
-    (corfu-cycle t)
-    (setq corfu-popupinfo-delay '(1.25 . 0.5))
-    (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
-
-    ;; Sort by input history (no need to modify `corfu-sort-function').
-    (with-eval-after-load 'savehist
-      (corfu-history-mode 1)
-      (add-to-list 'savehist-additional-variables 'corfu-history)))
+        ;; Sort by input history (no need to modify `corfu-sort-function').
+        (with-eval-after-load 'savehist
+          (corfu-history-mode 1)
+          (add-to-list 'savehist-additional-variables 'corfu-history)))
 
 
-(use-package cape
-  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-  ;; Press C-c p ? to for help.
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
-  ;; Alternatively bind Cape commands individually.
-  ;; :bind (("C-c p d" . cape-dabbrev)
-  ;;        ("C-c p h" . cape-history)
-  ;;        ("C-c p f" . cape-file)
-  ;;        ...)
-  :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-  ;; ...
-)
-  (use-package embark
-    :ensure t
+    (use-package cape
+      ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+      ;; Press C-c p ? to for help.
+      :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+      ;; Alternatively bind Cape commands individually.
+      ;; :bind (("C-c p d" . cape-dabbrev)
+      ;;        ("C-c p h" . cape-history)
+      ;;        ("C-c p f" . cape-file)
+      ;;        ...)
+      :init
+      ;; Add to the global default value of `completion-at-point-functions' which is
+      ;; used by `completion-at-point'.  The order of the functions matters, the
+      ;; first function returning a result wins.  Note that the list of buffer-local
+      ;; completion functions takes precedence over the global list.
+      (add-hook 'completion-at-point-functions #'cape-dabbrev)
+      (add-hook 'completion-at-point-functions #'cape-file)
+      (add-hook 'completion-at-point-functions #'cape-elisp-block)
+      ;; (add-hook 'completion-at-point-functions #'cape-history)
+      ;; ...
+    )
+      (use-package embark
+        :ensure t
 
-    :bind
-    (("C-," . embark-act)         ;; pick some comfortable binding
-     ("C-;" . embark-dwim)        ;; good alternative: M-.
-     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+        :bind
+        (("C-," . embark-act)         ;; pick some comfortable binding
+         ("C-;" . embark-dwim)        ;; good alternative: M-.
+         ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
 
-    :init
+        :init
 
-    ;; Optionally replace the key help with a completing-read interface
-    (setq prefix-help-command #'embark-prefix-help-command)
+        ;; Optionally replace the key help with a completing-read interface
+        (setq prefix-help-command #'embark-prefix-help-command)
 
-    :config
-    (vertico-multiform-mode)
-    (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
+        :config
+        (vertico-multiform-mode)
+        (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
 
-    ;; Hide the mode line of the Embark live/completions buffers
-    (add-to-list 'display-buffer-alist
-                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                   nil
-                   (window-parameters (mode-line-format . none)))))
+        ;; Hide the mode line of the Embark live/completions buffers
+        (add-to-list 'display-buffer-alist
+                     '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                       nil
+                       (window-parameters (mode-line-format . none)))))
 
-  ;; Consult users will also want the embark-consult package.
-  (use-package embark-consult
-    :ensure t
-    :after (embark consult)
-    :demand t ; only necessary if you have the hook below
-    ;; if you want to have consult previews as you move around an
-    ;; auto-updating embark collect buffer
-    :hook
-    (embark-collect-mode . consult-preview-at-point-mode))
+      ;; Consult users will also want the embark-consult package.
+      (use-package embark-consult
+        :ensure t
+        :after (embark consult)
+        :demand t ; only necessary if you have the hook below
+        ;; if you want to have consult previews as you move around an
+        ;; auto-updating embark collect buffer
+        :hook
+        (embark-collect-mode . consult-preview-at-point-mode))
 
 ;;; Development Tools & Features
 
@@ -482,110 +593,132 @@
   (use-package emmet-mode
     :hook (web-mode . emmet-mode))
 
-;;;; data work formats
+  ;;;; data work formats
 
-  ;; CSV/TSV file handling
-  (use-package csv-mode
-    :mode "\\.csv\\'")
+    ;; CSV/TSV file handling
+    (use-package csv-mode
+      :mode "\\.csv\\'")
 
-  ;; Support for markdown docs
-  (use-package markdown-mode
-    :mode ("README\\.md\\'" . gfm-mode)
-    :mode ("\\.md\\'" . markdown-mode))
+    ;; Support for markdown docs
+    (use-package markdown-mode
+      :mode ("README\\.md\\'" . gfm-mode)
+      :mode ("\\.md\\'" . markdown-mode))
 
-  ;; Hledger
-  (use-package ledger-mode
-    :custom
-    ((ledger-binary-path "hledger")
-     (ledger-mode-should-check-version nil)
-     (ledger-report-auto-width nil)
-     (ledger-report-links-in-register nil)
-     (ledger-report-native-highlighting-arguments '("--color=always")))
-    :mode ("\\.hledger\\'" "\\.ledger\\'"))
-
-;;; Org Mode Configuration
-
-    (use-package org
-
-      :config
-      (setq org-confirm-babel-evaluate nil)
-      ;; Enable code blocks for languages you use
-      (org-babel-do-load-languages
-       'org-babel-load-languages
-       '((python . t)
-         (R . t)
-         (emacs-lisp . t)))
-
- ;; src block templates
-      (setq org-structure-template-alist
-	    '(("s" . "src")
-        
-              ;; Emacs Lisp
-              ("e" . "src emacs-lisp")
-              ("E" . "src emacs-lisp :results value code :lexical t")
-        
-              ;; Python
-              ("p" . "src python")
-              ("po" . "src python :results output")
-              ("ps" . "src python :session :results output")
-        
-              ;; R
-              ("r" . "src R")
-              ("ro" . "src R :results output")
-              ("rp" . "src R :results output graphics file :file plot.png")
-              ("rs" . "src R :session")
-        
-              ;; Bash
-              ("b" . "src bash")
-              ("sh" . "src sh :results output")
-        
-              ;; Documentation
-              ("x" . "example")
-              ("q" . "quote")
-              ("v" . "verse")))
-
-      
-;; Capture templates
-      (setq org-capture-templates
-       '(
-	 ("i" "Inbox" entry
-         (file+headline "~/Documents/notes/inbox.org" "Inbox")
-           "* %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
-           :empty-lines 1)
-          
-          ("t" "Todo" entry
-           (file+headline "~/Documents/notes/inbox.org" "Tasks")
-           "* TODO  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
-           :empty-lines 1)))
-  
-  ;; Agenda files
-      (setq org-agenda-files '("~/Documents/notes"))
-  
-  ;; Global keybindings
-      (global-set-key (kbd "C-c c") 'org-capture)
-      (global-set-key (kbd "C-c a") 'org-agenda)
-      (global-set-key (kbd "C-c l") 'org-store-link)
-
+    ;; Hledger
+    (use-package ledger-mode
       :custom
-      (org-startup-indented t)
-      (org-M-RET-may-split-line '((default . nil)))
-      (org-insert-heading-respect-content t)
-      (org-hide-emphasis-markers t)
-      (org-startup-with-inline-images t)
-      (org-image-actual-width '(450))
-      (org-pretty-entities t)
-      (org-use-sub-superscripts "{}")
-      (org-id-link-to-org-use-id t)
-      (org-return-follows-link t)
-      (org-fold-catch-invisible-edits))
-     
-      ;; Nice bullets instead of asterisks
-     (use-package org-bullets
-       :hook (org-mode . org-bullets-mode))
+      ((ledger-binary-path "hledger")
+       (ledger-mode-should-check-version nil)
+       (ledger-report-auto-width nil)
+       (ledger-report-links-in-register nil)
+       (ledger-report-native-highlighting-arguments '("--color=always")))
+      :mode ("\\.hledger\\'" "\\.ledger\\'"))
 
-(use-package org-modern
-  :hook
-  (org-mode . org-modern-mode))
+    ;;; Org Mode Configuration
+
+      (use-package org
+
+        :config
+        (setq org-confirm-babel-evaluate nil)
+        ;; Enable code blocks for languages you use
+        (org-babel-do-load-languages
+         'org-babel-load-languages
+         '((python . t)
+           (R . t)
+           (emacs-lisp . t)))
+
+	;; src block templates
+        (setq org-structure-template-alist
+  	    '(("s" . "src")
+          
+                ;; Emacs Lisp
+                ("e" . "src emacs-lisp")
+                ("E" . "src emacs-lisp :results value code :lexical t")
+          
+                ;; Python
+                ("p" . "src python")
+                ("po" . "src python :results output")
+                ("ps" . "src python :session :results output")
+          
+                ;; R
+                ("r" . "src R\n")
+                ("rp" . "src R :results output graphics file :file plot.png\n\n")
+          
+                ;; Bash
+                ("b" . "src bash")
+                ("sh" . "src sh :results output")
+          
+                ;; Documentation
+                ("x" . "example")
+                ("q" . "quote")
+                ("v" . "verse")))
+
+        (setq org-babel-default-header-args:R
+        '((:session . "*R*")           ; Use persistent R session by default
+          (:results . "output")         ; Show R console output
+          (:exports . "both")           ; Export both code and results
+          (:cache . "no")               ; Don't cache results (for interactive work)
+          (:prologue . "options(crayon.enabled = FALSE, cli.num_colors = 1)")
+          (:tangle . "no")))
+        
+        (setq org-src-fontify-natively t
+  	    org-src-tab-acts-natively t
+  	    org-src-preserve-indentation t)
+        
+  ;; Capture templates
+        (setq org-capture-templates
+         '(
+  	 ("i" "Inbox" entry
+           (file+headline "~/Documents/notes/inbox.org" "Inbox")
+             "*  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
+             :empty-lines 1)
+            
+            ("t" "Todo" entry
+             (file+headline "~/Documents/notes/inbox.org" "Tasks")
+             "* TODO  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
+             :empty-lines 1)))
+    
+    ;; Agenda files
+        (setq org-agenda-files '("~/Documents/notes"))
+    
+    ;; Global keybindings
+        (global-set-key (kbd "C-c c") 'org-capture)
+        (global-set-key (kbd "C-c a") 'org-agenda)
+        (global-set-key (kbd "C-c l") 'org-store-link)
+
+        :custom
+        (org-startup-indented t)
+        (org-M-RET-may-split-line '((default . nil)))
+        (org-insert-heading-respect-content t)
+        (org-hide-emphasis-markers t)
+        (org-startup-with-inline-images t)
+        (org-image-actual-width '(450))
+        (org-pretty-entities t)
+        (org-use-sub-superscripts "{}")
+        (org-id-link-to-org-use-id t)
+        (org-return-follows-link t)
+        (org-fold-catch-invisible-edits t))
+       
+        ;; Nice bullets instead of asterisks
+       (use-package org-bullets
+         :hook (org-mode . org-bullets-mode))
+
+;; get rid of ansi characters in output of R Babel blocks
+(defun my/babel-ansi-colorize-results ()
+  "Apply ANSI color escape sequences to Org Babel results."
+  (when-let ((beg (org-babel-where-is-src-block-result nil nil)))
+    (save-excursion
+      (goto-char beg)
+      (when (looking-at org-babel-result-regexp)
+        (let ((end (org-babel-result-end))
+              (ansi-color-context-region nil))
+          (ansi-color-apply-on-region beg end))))))
+
+(add-hook 'org-babel-after-execute-hook 'my/babel-ansi-colorize-results)
+
+  (use-package org-modern
+    :hook
+    (org-mode . org-modern-mode))
 
 ;;; General Settings
 
@@ -664,6 +797,7 @@
     (setq dired-recursive-copies 'always)
     (setq dired-recursive-deletes 'always)
     (setq delete-by-moving-to-trash t)
+    (setq dired-listing-switches "-AGFhlv --group-directories-first --time-style=long-iso")
     (setq dired-dwim-target t))
 
   (use-package dired-subtree
@@ -689,7 +823,7 @@
     :after dired 
     :config
     (setq dired-preview-delay 0.7)
-    (setq dired-preview-max-size (expt 2 20))
+    (setq dired-preview-max-size (expt 2 25))
     (setq dired-preview-ignored-extensions-regexp
           (concat "\\."
                   "\\(gz\\|"
@@ -699,36 +833,37 @@
                   "rar\\|"
                   "zip\\|"
                   "iso\\|"
+                  "RAF\\|"
                   "epub"
                   "\\)"))
 
     (dired-preview-global-mode 1))
 
-(use-package bibtex
-  :custom
-  (bibtex-user-optional-fields
-   '(("keywords" "Keywords to describe the entry" "")
-     ("file"     "Relative or absolute path to attachments" "" )))
-  (bibtex-align-at-equal-sign t)
-  :config
-  (ews-bibtex-register)
-  :bind
-  (("C-c b r" . ews-bibtex-register)))
+    (use-package bibtex
+    :custom
+    (bibtex-user-optional-fields
+     '(("keywords" "Keywords to describe the entry" "")
+       ("file"     "Relative or absolute path to attachments" "" )))
+    (bibtex-align-at-equal-sign t)
+    :config
+    (ews-bibtex-register)
+    :bind
+    (("C-c b r" . ews-bibtex-register)))
 
-;; Biblio package for adding BibTeX records
+  ;; Biblio package for adding BibTeX records
 
-(use-package biblio
-  :bind
-  (("C-c b b" . ews-bibtex-biblio-lookup)))
+  (use-package biblio
+    :bind
+    (("C-c b b" . ews-bibtex-biblio-lookup)))
 
-;; Citar to access bibliographies
+  ;; Citar to access bibliographies
 
-(use-package citar
-  :defer t
-  :custom
-  (citar-bibliography ews-bibtex-files))
+  (use-package citar
+    :defer t
+    :custom
+    (citar-bibliography ews-bibtex-files))
 
-;;; Denote
+  ;;; Denote
    (use-package denote
       :custom
       (denote-sort-keywords t)
@@ -840,7 +975,7 @@
     (doc-view-resolution 300)
     (large-file-warning-threshold (* 50 (expt 2 20))))
 
-  ;; Read ePub files
+;; Read ePub files
 
   (use-package nov
     :init
