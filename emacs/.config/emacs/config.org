@@ -44,6 +44,8 @@
     (straight-use-package 'use-package)
     (setq straight-use-package-by-default t)
 
+;; add project and flymake to the pseudo-packages variable so straight.el doesn't download a separate version than what eglot downloads.
+  (setq straight-built-in-pseudo-packages '(emacs nadvice python image-mode project flymake))
 
     ;; stop warnings when installing packages
 
@@ -71,6 +73,12 @@
 (setq shell-file-name "/usr/bin/zsh")
 (setq explicit-shell-file-name "/usr/bin/zsh")
 
+;; make terminals read only after input so to not overwrite previous commands/output
+(setq comint-prompt-read-only t)
+    (defun my-comint-preoutput-turn-buffer-read-only (text)
+      (propertize text 'read-only t))
+    (add-hook 'comint-preoutput-filter-functions 'my-comint-preoutput-turn-buffer-read-only)
+
 
 ;; ansi colors in terminals and such
 (use-package ansi-color
@@ -89,7 +97,6 @@
   
   ;; Don't ask to kill the buffer when running new command
   (setq compilation-always-kill t))
-
 
   (setq use-short-answers t)
 
@@ -114,6 +121,8 @@
     :config
     (setq gcmh-idle-delay 5
           gcmh-high-cons-threshold (* 16 1024 1024))) ;; 16MB
+
+(electric-pair-mode 1)
 
   (use-package ews
     :straight nil
@@ -173,8 +182,11 @@
     :init
     (setq popper-reference-buffers
           '("\\*Messages\\*"
+	    "\\*eshell\\*"
+	    "\\*vterm\\*"
             "Output\\*$"
             "\\*Async Shell Command\\*"
+	    "\\*python:main\\*"
             help-mode
 	    helpful-mode
             compilation-mode))
@@ -566,15 +578,10 @@
 
     ;; LSP support using built-in eglot
     (use-package eglot
-      :hook ((python-mode . eglot-ensure)
-             (r-mode . eglot-ensure)
-             (css-mode . eglot-ensure)
-             (html-mode . eglot-ensure)
-             (web-mode . eglot-ensure)
-      	 (ess-mode . eglot-ensure))
+      :hook (python-ts-mode python-mode r-mode css-mode html-mode web-mode ess-mode . eglot-ensure)
       :config
       ;; Configure LSP servers
-      (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
+      (add-to-list 'eglot-server-programs '(python-mode . ("pylsp" "--stdio")))
       (add-to-list 'eglot-server-programs '(r-mode . ("R" "--slave" "-e" "languageserver::run()")))
       (add-to-list 'eglot-server-programs '(web-mode . ("vscode-html-language-server" "--stdio"))))
 
@@ -595,20 +602,60 @@
       (treesit-auto-add-to-auto-mode-alist 'all)
       (global-treesit-auto-mode))
 #+END_SRC
+** shell
+:PROPERTIES:
+:ID:       1f089cdd-3afe-4804-a5ea-dcd219f0ae4a
+:END:
+#+begin_src emacs-lisp
+
+;;; eshell customization
+(use-package eshell
+  :straight nil  ; built-in
+  :bind ("C-c e" . eshell)
+  :config
+  ;; Better prompt
+  (setq eshell-prompt-regexp "^[^#$\n]* [#$] "
+        eshell-prompt-function
+        (lambda ()
+          (concat
+           (abbreviate-file-name (eshell/pwd))
+           (if (= (user-uid) 0) " # " " $ ")))))
+#+end_src
 ** Python
 :PROPERTIES:
 :ID:       2c6f0e37-786d-477e-b33f-8ac8862a5cf4
 :END:
 #+BEGIN_SRC emacs-lisp
-;;;; Python
-  (use-package python
-    :mode ("\\.py\\'" . python-mode)
-    :config
-    (setq python-indent-offset 4))
-  
-  ;; Better Python REPL
-  (use-package jupyter
-    :defer t)
+  ;;;; Python
+    (use-package python
+      :mode ("\\.py\\'" . python-mode)
+      :config
+      (setq python-indent-offset 4)
+      (setq python-shell-completion-native-enable nil))
+
+(require 'treesit)
+
+(use-package uv
+  :straight (uv :type git :host github :repo "johannes-mueller/uv.el")
+  :init
+  (add-to-list 'treesit-language-source-alist '(toml "https://github.com/tree-sitter-grammars/tree-sitter-toml"))
+  (unless (treesit-language-available-p 'toml)
+    (treesit-install-language-grammar 'toml)))
+
+(use-package py-vterm-interaction
+  :hook (python-mode . py-vterm-interaction-mode)
+  :config
+  ;;; Suggested:
+  ;; (setq-default py-vterm-interaction-repl-program "ipython")
+  ;; (setq-default py-vterm-interaction-silent-cells t)
+  )
+
+(use-package flycheck-eglot
+  :ensure t
+  :after (flycheck eglot)
+  :config
+  (global-flycheck-eglot-mode 1))
+
 #+END_SRC
 
 ** R Support
@@ -1093,7 +1140,6 @@
       (("C-c o" . ews-olivetti)))
 
     ;; ediff
-
     (use-package ediff
       :straight nil
       :custom
@@ -1102,14 +1148,42 @@
       (ediff-window-setup-function 'ediff-setup-windows-plain))
 
   ;; Doc-View
-
   (use-package doc-view
     :custom
     (doc-view-resolution 300)
     (large-file-warning-threshold (* 50 (expt 2 20))))
 
-;; Read ePub files
+;;;; PDF Tools
+(use-package pdf-tools
+  :mode ("\\.pdf\\'" . pdf-view-mode)
+  :magic ("%PDF" . pdf-view-mode)
+  :init
+  ;; Point to the manually compiled server
+  (setq pdf-info-epdfinfo-program 
+        (expand-file-name "straight/repos/pdf-tools/server/epdfinfo" 
+                          user-emacs-directory))
+  :config
+  ;; Load pdf-tools
+  (pdf-loader-install)
+  
+  ;; Display settings
+  (setq-default pdf-view-display-size 'fit-page)
+  (setq pdf-view-resize-factor 1.1)  ; Zoom increment
+  
+  ;; Annotation settings
+  (setq pdf-annot-activate-created-annotations t)
+  
+  ;; Keybindings for common tasks
+  :bind (:map pdf-view-mode-map
+              ;; Annotations
+              ("C-c C-a h" . pdf-annot-add-highlight-markup-annotation)
+              ("C-c C-a t" . pdf-annot-add-text-annotation)
+              ("C-c C-a d" . pdf-annot-delete)
+              ("C-c C-a l" . pdf-annot-list-annotations)
+              ;; Navigation
+              ("M-g g" . pdf-view-goto-page)))
 
+;; Read ePub files
   (use-package nov
     :init
     (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
