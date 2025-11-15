@@ -150,11 +150,12 @@
 
   ;; disable line numbers in certain modes
   (dolist (mode '(org-mode-hook
-    		term-mode-hook
-    		vterm-mode-hook
-    		R-mode-hook
-    		eshell-mode-hook
-    		eww-mode-hook))
+    		    term-mode-hook
+    		    vterm-mode-hook
+    		    R-mode-hook
+  		inferior-python-mode    
+    		    eshell-mode-hook
+    		    eww-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
   (setq visible-bell t            ; flash the bell rings
@@ -562,45 +563,61 @@
 :ID:       88506ca6-252f-4bc9-a01f-5da8ee76daba
 :END:
 #+BEGIN_SRC emacs-lisp
-;;; Development Tools & Features
+      ;;; Development Tools & Features
 
-    (use-package vterm)
+         (use-package vterm)
 
-    ;; Git integration
-    (use-package magit
-      :commands magit-status)
+          ;; Git integration
+         (use-package magit
+            :commands magit-status)
 
-    (setq-default ispell-program-name "hunspell")
+         (setq-default ispell-program-name "hunspell")
 
-    ;; Syntax checking
-    (use-package flycheck
-      :init (global-flycheck-mode))
+         
+          ;; LSP support using built-in eglot
+         (use-package eglot
+           :straight nil
+           :hook ((python-ts-mode . eglot-ensure)  ; Python
+             (r-mode . eglot-ensure)           ; R
+             (css-mode . eglot-ensure)         ; CSS
+             (html-mode . eglot-ensure)        ; HTML
+             (web-mode . eglot-ensure))        ; Web templates
+           :config
+            ;; Configure LSP servers
+            (add-to-list 'eglot-server-programs '(python-ts-mode . ("pylsp")))
+            (add-to-list 'eglot-server-programs '(r-mode . ("R" "--slave" "-e" "languageserver::run()")))
+            (add-to-list 'eglot-server-programs '(web-mode . ("vscode-html-language-server" "--stdio")))
+            (setq eglot-autoshutdown t  ; Shutdown server when last buffer is killed
+      	    eglot-sync-connect nil))  ; Don't block on connection
+;; try this later so that pylsp is running from uv
+ ;; `((python-ts-mode python-mode) . ("uv" "tool" "run" "--from" "python-lsp-server[all]" "pylsp")))
 
-    ;; LSP support using built-in eglot
-    (use-package eglot
-      :hook (python-ts-mode python-mode r-mode css-mode html-mode web-mode ess-mode . eglot-ensure)
-      :config
-      ;; Configure LSP servers
-      (add-to-list 'eglot-server-programs '(python-mode . ("pylsp" "--stdio")))
-      (add-to-list 'eglot-server-programs '(r-mode . ("R" "--slave" "-e" "languageserver::run()")))
-      (add-to-list 'eglot-server-programs '(web-mode . ("vscode-html-language-server" "--stdio"))))
+  ;; Syntax checking
+         (use-package flycheck
+            :init (global-flycheck-mode))
 
-    (use-package yasnippet
-      :init (yas-global-mode 1))
+         (use-package flycheck-eglot
+  	 :ensure t
+  	 :after (flycheck eglot)
+  	 :config
+  	 (global-flycheck-eglot-mode 1))
 
-    (use-package yasnippet-snippets) ;; Collection of snippets
+         (use-package yasnippet
+            :init (yas-global-mode 1))
 
-    ;; Delete the selected text upon text insertion
-    (use-package delsel
-      :straight nil ; no need to install it as it is built-in
-      :hook (after-init . delete-selection-mode))
+         (use-package yasnippet-snippets) ;; Collection of snippets
 
-  (use-package treesit-auto
-      :custom
-      (treesit-auto-install 'prompt)
-      :config
-      (treesit-auto-add-to-auto-mode-alist 'all)
-      (global-treesit-auto-mode))
+          ;; Delete the selected text upon text insertion
+         (use-package delsel
+            :straight nil ; no need to install it as it is built-in
+            :hook (after-init . delete-selection-mode))
+
+         (use-package treesit-auto
+            :custom
+            (treesit-auto-install 'prompt)
+            :config
+            (treesit-auto-add-to-auto-mode-alist 'all)
+            (global-treesit-auto-mode))
 #+END_SRC
 ** shell
 :PROPERTIES:
@@ -614,47 +631,76 @@
   :bind ("C-c e" . eshell)
   :config
   ;; Better prompt
-  (setq eshell-prompt-regexp "^[^#$\n]* [#$] "
-        eshell-prompt-function
-        (lambda ()
-          (concat
-           (abbreviate-file-name (eshell/pwd))
-           (if (= (user-uid) 0) " # " " $ ")))))
+    (defun my/eshell-prompt ()
+    (concat
+     ;; Directory
+     (propertize (abbreviate-file-name (eshell/pwd)) 
+                 'face '(:foreground "cyan"))
+     ;; Git branch if in repo
+     (when-let ((branch (magit-get-current-branch)))
+       (propertize (format " (%s)" branch) 
+                   'face '(:foreground "green")))
+     ;; Prompt symbol
+     (if (= (user-uid) 0) " # " " $ ")))
+  
+  (setq eshell-prompt-function #'my/eshell-prompt)
+
+  ;; History settings
+  (setq eshell-history-size 10000
+        eshell-hist-ignoredups t
+        eshell-save-history-on-exit t
+        eshell-history-file-name 
+        (expand-file-name "eshell/history" user-emacs-directory))
+  
+  ;; Scrolling behavior  
+  (setq eshell-scroll-to-bottom-on-input t
+        eshell-scroll-show-maximum-output t
+        eshell-buffer-maximum-lines 10000)
+
+;; Prefer Emacs commands over external
+  (setq eshell-prefer-lisp-functions t
+        eshell-prefer-lisp-variables t)
+  
+ ;; Enable smart mode (optional - try without first)
+;; Load the smart module
+  (require 'em-smart)
+  
+  ;; Add it to modules list
+  (add-to-list 'eshell-modules-list 'eshell-smart)
+
+  ;; Better completion
+  (setq eshell-cmpl-ignore-case t))
+
 #+end_src
 ** Python
 :PROPERTIES:
 :ID:       2c6f0e37-786d-477e-b33f-8ac8862a5cf4
 :END:
 #+BEGIN_SRC emacs-lisp
-  ;;;; Python
-    (use-package python
-      :mode ("\\.py\\'" . python-mode)
-      :config
-      (setq python-indent-offset 4)
-      (setq python-shell-completion-native-enable nil))
+    ;;;; Python
+      (use-package python
+        :straight nil
+	:init
+	:config
+        (setq python-indent-offset 4)
+        (setq python-shell-completion-native-enable nil))
 
-(require 'treesit)
+  (use-package uv
+    :straight (uv :type git :host github :repo "johannes-mueller/uv.el")
+    :init
+    (add-to-list 'treesit-language-source-alist '(toml "https://github.com/tree-sitter-grammars/tree-sitter-toml"))
+    (unless (treesit-language-available-p 'toml)
+      (treesit-install-language-grammar 'toml)))
 
-(use-package uv
-  :straight (uv :type git :host github :repo "johannes-mueller/uv.el")
-  :init
-  (add-to-list 'treesit-language-source-alist '(toml "https://github.com/tree-sitter-grammars/tree-sitter-toml"))
-  (unless (treesit-language-available-p 'toml)
-    (treesit-install-language-grammar 'toml)))
+  (use-package py-vterm-interaction
+    :after python
+    :hook (python-ts-mode . py-vterm-interaction-mode)
+    :config
+    ;;; Suggested:
+    ;; (setq-default py-vterm-interaction-repl-program "ipython")
+    ;;(setq-default py-vterm-interaction-silent-cells t)
+    )
 
-(use-package py-vterm-interaction
-  :hook (python-mode . py-vterm-interaction-mode)
-  :config
-  ;;; Suggested:
-  ;; (setq-default py-vterm-interaction-repl-program "ipython")
-  ;; (setq-default py-vterm-interaction-silent-cells t)
-  )
-
-(use-package flycheck-eglot
-  :ensure t
-  :after (flycheck eglot)
-  :config
-  (global-flycheck-eglot-mode 1))
 
 #+END_SRC
 

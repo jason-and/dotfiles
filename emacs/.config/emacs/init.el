@@ -1,17 +1,17 @@
-;; -*- lexical-binding: t; -*-
-;; Restore reasonable GC settings after startup
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (setq gc-cons-threshold (* 2 1000 1000)) ;; 2MB
-            (setq gc-cons-percentage 0.1)
-            
-            ;; Show startup time
-            (message "Emacs loaded in %s with %d garbage collections."
-                     (format "%.2f seconds"
-                             (float-time (time-subtract after-init-time before-init-time)))
-                     gcs-done)))
+  ;; -*- lexical-binding: t; -*-
+  ;; Restore reasonable GC settings after startup
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (setq gc-cons-threshold (* 2 1000 1000)) ;; 2MB
+              (setq gc-cons-percentage 0.1)
+              
+              ;; Show startup time
+              (message "Emacs loaded in %s with %d garbage collections."
+                       (format "%.2f seconds"
+                               (float-time (time-subtract after-init-time before-init-time)))
+                       gcs-done)))
 
-;;;Bootstrap straight.el
+  ;;;Bootstrap straight.el
 
     (defvar bootstrap-version)
     (let ((bootstrap-file
@@ -109,121 +109,122 @@
     :straight nil
     :load-path "~/.config/emacs/")
 
-;;; Core UI Configuration
+  ;;; Core UI Configuration
 
-;; Basic UI settings
-(column-number-mode 1)
-(global-display-line-numbers-mode 1)
-(setq display-line-numbers-type 'relative) ;; Vim-like relative line numbers
+  ;; Basic UI settings
+  (column-number-mode 1)
+  (global-display-line-numbers-mode 1)
+  (setq display-line-numbers-type 'relative) ;; Vim-like relative line numbers
 
-;;line highlighting
-;;enable it for all programming major modes
-(add-hook 'prog-mode-hook #'hl-line-mode)
-;;and for all modes derived from text-mode
-(add-hook 'text-mode-hook #'hl-line-mode)
+  ;;line highlighting
+  ;;enable it for all programming major modes
+  (add-hook 'prog-mode-hook #'hl-line-mode)
+  ;;and for all modes derived from text-mode
+  (add-hook 'text-mode-hook #'hl-line-mode)
 
 
-;; disable line numbers in certain modes
-(dolist (mode '(org-mode-hook
-  		term-mode-hook
-  		vterm-mode-hook
-  		R-mode-hook
-  		eshell-mode-hook
-  		eww-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  ;; disable line numbers in certain modes
+  (dolist (mode '(org-mode-hook
+    		    term-mode-hook
+    		    vterm-mode-hook
+    		    R-mode-hook
+  		inferior-python-mode    
+    		    eshell-mode-hook
+    		    eww-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-(setq visible-bell t            ; flash the bell rings
-      use-dialog-box nil)       ; no dialog boxes
+  (setq visible-bell t            ; flash the bell rings
+        use-dialog-box nil)       ; no dialog boxes
 
-;; Split windows sensibly
+  ;; Split windows sensibly
 
-(setq split-width-threshold 120
-      split-height-threshold nil)
+  (setq split-width-threshold 120
+        split-height-threshold nil)
 
-(use-package balanced-windows
-  :config
-  (balanced-windows-mode 1))
+  (use-package balanced-windows
+    :config
+    (balanced-windows-mode 1))
 
-(use-package popper
-  :straight t
-  :bind (("C-`"   . popper-toggle)
-         ("M-`"   . popper-cycle)
-         ("C-M-`" . popper-toggle-type))
-  :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
+  (use-package popper
+    :straight t
+    :bind (("C-`"   . popper-toggle)
+           ("M-`"   . popper-cycle)
+           ("C-M-`" . popper-toggle-type))
+    :init
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
 	    "\\*eshell\\*"
 	    "\\*vterm\\*"
-          "Output\\*$"
-          "\\*Async Shell Command\\*"
+            "Output\\*$"
+            "\\*Async Shell Command\\*"
 	    "\\*python:main\\*"
-          help-mode
+            help-mode
 	    helpful-mode
-          compilation-mode))
-  (popper-mode +1)
-  (popper-echo-mode +1))                ; For echo area hints
+            compilation-mode))
+    (popper-mode +1)
+    (popper-echo-mode +1))                ; For echo area hints
 
-(use-package modus-themes
-  :ensure t
-  :config
-  (mapc #'disable-theme custom-enabled-themes)
-  (setq modus-themes-italic-constructs t
- 	modus-themes-bold-constructs t)
-  (modus-themes-include-derivatives-mode 1)
+  (use-package modus-themes
+    :ensure t
+    :config
+    (mapc #'disable-theme custom-enabled-themes)
+    (setq modus-themes-italic-constructs t
+   	modus-themes-bold-constructs t)
+    (modus-themes-include-derivatives-mode 1)
 
-  (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+    (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 
-(use-package ef-themes
-  :ensure t
-  :config
-  (setq ef-themes-to-toggle '(ef-day ef-owl))
-  (load-theme 'ef-day :no-confirm-loading))
+  (use-package ef-themes
+    :ensure t
+    :config
+    (setq ef-themes-to-toggle '(ef-day ef-owl))
+    (load-theme 'ef-day :no-confirm-loading))
 
-(use-package doric-themes)
+  (use-package doric-themes)
 
-(use-package theme-buffet
-  :after (modus-themes ef-themes doric-themes)  ; add your favorite themes here
-  :init
-  :functions calendar-current-time-zone
-  theme-buffet-modus-ef theme-buffet-timer-hours
-  :config
-  (require 'cal-dst)
-  (setopt theme-buffet-time-offset
-          (1+ (/ (cadr (calendar-current-time-zone)) 60)))
-   (theme-buffet-timer-hours 1)
-  (theme-buffet-modus-ef)
-  (theme-buffet-mode 1))
+  (use-package theme-buffet
+    :after (modus-themes ef-themes doric-themes)  ; add your favorite themes here
+    :init
+    :functions calendar-current-time-zone
+    theme-buffet-modus-ef theme-buffet-timer-hours
+    :config
+    (require 'cal-dst)
+    (setopt theme-buffet-time-offset
+            (1+ (/ (cadr (calendar-current-time-zone)) 60)))
+     (theme-buffet-timer-hours 1)
+    (theme-buffet-modus-ef)
+    (theme-buffet-mode 1))
 
-(use-package nerd-icons)
+  (use-package nerd-icons)
 
-(use-package nerd-icons-completion
-  :after marginalia
-  :config
-  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+  (use-package nerd-icons-completion
+    :after marginalia
+    :config
+    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
-(use-package nerd-icons-corfu
-  :after corfu
-  :config
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+  (use-package nerd-icons-corfu
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-(use-package nerd-icons-dired
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
+  (use-package nerd-icons-dired
+    :hook
+    (dired-mode . nerd-icons-dired-mode))
 
-(use-package spacious-padding
-  :straight t
-  :config
-  (setq spacious-padding-subtle-frame-lines
-   	`( :mode-line-active 'default
-           :mode-line-inactive vertical-border))
-  :custom
-  (line-spacing 3)
-  (spacious-padding-mode 1))
+  (use-package spacious-padding
+    :straight t
+    :config
+    (setq spacious-padding-subtle-frame-lines
+     	`( :mode-line-active 'default
+             :mode-line-inactive vertical-border))
+    :custom
+    (line-spacing 3)
+    (spacious-padding-mode 1))
 
-;; Highlight matching parentheses
-(show-paren-mode 1)
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  ;; Highlight matching parentheses
+  (show-paren-mode 1)
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package fontaine
   :straight t
@@ -346,181 +347,197 @@
     :config
     (evil-commentary-mode))
 
-;;; Which Key 
+  ;;; Which Key 
 
-  ;; Which Key for discovering keybinding;; s
-  (use-package which-key
-    :init
-    (setq which-key-idle-delay 0.3)
-    :config
-    (which-key-mode)
-    :custom
-    (which-key-max-description-length 40)
-    (which-key-lighter nil)
-    (which-key-sort-order 'which-key-description-order)
-    (which-key-setup-side-window-right-bottom))
-
-  (use-package keycast
-    :config
-    (keycast-mode)
-    (keycast-mode-line-mode))
-
-;;; Completion Framework
-;; minibuffer completion
-(use-package vertico
-  :config (vertico-mode))
-
-;; vertico uses posframe (frame in center of screen)
-(use-package vertico-posframe
-  :init(vertico-posframe-mode 1))
-
-;; adds helpful info about options in minibuffer
-(use-package marginalia
-  :init (marginalia-mode))
-
-(use-package orderless
-  :custom
-  (completion-styles '(orderless flex basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
-
-;; one column that does not take up whole screen
-(setq completions-format 'one-column)
-(unless (version< emacs-version "29.0")
-  (setq completions-max-height 20))
-
-;; similar to Prot's MCT package
-  (setq completion-auto-help 'always
-        completion-auto-select 'second-tab
-        completion-show-help nil
-        completions-sort nil
-        completions-header-format nil)
-
-(file-name-shadow-mode 1)
-
-(add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
-
-;; Enhanced command, buffer, and file selection
-  (use-package consult
-    :bind (("C-x b" . consult-buffer)
-           ("C-x 4 b" . consult-buffer-other-window)
-           ("C-c s" . consult-ripgrep)
-           ("C-s" . consult-line)))
-
-  (use-package savehist
-    :straight nil
-    :hook (after-init . savehist-mode))
-
-  (use-package corfu
-    :init (global-corfu-mode)
-    :bind (:map corfu-map ("<tab>" . corfu-complete))
-    :custom
-    (tab-always-indent 'complete)
-    (corfu-preview-current nil)
-    (corfu-min-width 20)
-    (corfu-auto t)
-    (corfu-auto-prefix 2)
-    (corfu-cycle t)
-    (setq corfu-popupinfo-delay '(1.25 . 0.5))
-    (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
-
-    ;; Sort by input history (no need to modify `corfu-sort-function').
-    (with-eval-after-load 'savehist
-      (corfu-history-mode 1)
-      (add-to-list 'savehist-additional-variables 'corfu-history)))
-
-
-(use-package cape
-  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-  ;; Press C-c p ? to for help.
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
-  ;; Alternatively bind Cape commands individually.
-  ;; :bind (("C-c p d" . cape-dabbrev)
-  ;;        ("C-c p h" . cape-history)
-  ;;        ("C-c p f" . cape-file)
-  ;;        ...)
-  :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-  ;; ...
-)
-  (use-package embark
-    :ensure t
-
-    :bind
-    (("C-," . embark-act)         ;; pick some comfortable binding
-     ("C-;" . embark-dwim)        ;; good alternative: M-.
-     ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
-
-    :init
-
-    ;; Optionally replace the key help with a completing-read interface
-    (setq prefix-help-command #'embark-prefix-help-command)
-
-    :config
-    (vertico-multiform-mode)
-    (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
-
-    ;; Hide the mode line of the Embark live/completions buffers
-    (add-to-list 'display-buffer-alist
-                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                   nil
-                   (window-parameters (mode-line-format . none)))))
-
-  ;; Consult users will also want the embark-consult package.
-  (use-package embark-consult
-    :ensure t
-    :after (embark consult)
-    :demand t ; only necessary if you have the hook below
-    ;; if you want to have consult previews as you move around an
-    ;; auto-updating embark collect buffer
-    :hook
-    (embark-collect-mode . consult-preview-at-point-mode))
-
-;;; Development Tools & Features
-
-    (use-package vterm)
-
-    ;; Git integration
-    (use-package magit
-      :commands magit-status)
-
-    (setq-default ispell-program-name "hunspell")
-
-    ;; Syntax checking
-    (use-package flycheck
-      :init (global-flycheck-mode))
-
-    ;; LSP support using built-in eglot
-    (use-package eglot
-      :hook (python-ts-mode python-mode r-mode css-mode html-mode web-mode ess-mode . eglot-ensure)
+    ;; Which Key for discovering keybinding;; s
+    (use-package which-key
+      :init
+      (setq which-key-idle-delay 0.3)
       :config
-      ;; Configure LSP servers
-      (add-to-list 'eglot-server-programs '(python-mode . ("pylsp" "--stdio")))
-      (add-to-list 'eglot-server-programs '(r-mode . ("R" "--slave" "-e" "languageserver::run()")))
-      (add-to-list 'eglot-server-programs '(web-mode . ("vscode-html-language-server" "--stdio"))))
-
-    (use-package yasnippet
-      :init (yas-global-mode 1))
-
-    (use-package yasnippet-snippets) ;; Collection of snippets
-
-    ;; Delete the selected text upon text insertion
-    (use-package delsel
-      :straight nil ; no need to install it as it is built-in
-      :hook (after-init . delete-selection-mode))
-
-  (use-package treesit-auto
+      (which-key-mode)
       :custom
-      (treesit-auto-install 'prompt)
+      (which-key-max-description-length 40)
+      (which-key-lighter nil)
+      (which-key-sort-order 'which-key-description-order)
+      (which-key-setup-side-window-right-bottom))
+
+    (use-package keycast
       :config
-      (treesit-auto-add-to-auto-mode-alist 'all)
-      (global-treesit-auto-mode))
+      (keycast-mode)
+      (keycast-mode-line-mode))
+
+  ;;; Completion Framework
+  ;; minibuffer completion
+  (use-package vertico
+    :config (vertico-mode))
+
+  ;; vertico uses posframe (frame in center of screen)
+  (use-package vertico-posframe
+    :init(vertico-posframe-mode 1))
+
+  ;; adds helpful info about options in minibuffer
+  (use-package marginalia
+    :init (marginalia-mode))
+
+  (use-package orderless
+    :custom
+    (completion-styles '(orderless flex basic))
+    (completion-category-overrides '((file (styles basic partial-completion)))))
+
+  ;; one column that does not take up whole screen
+  (setq completions-format 'one-column)
+  (unless (version< emacs-version "29.0")
+    (setq completions-max-height 20))
+
+  ;; similar to Prot's MCT package
+    (setq completion-auto-help 'always
+          completion-auto-select 'second-tab
+          completion-show-help nil
+          completions-sort nil
+          completions-header-format nil)
+
+  (file-name-shadow-mode 1)
+
+  (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
+
+      ;; Enhanced command, buffer, and file selection
+      (use-package consult
+        :bind (("C-x b" . consult-buffer)
+               ("C-x 4 b" . consult-buffer-other-window)
+               ("C-c s" . consult-ripgrep)
+               ("C-s" . consult-line)))
+
+      (use-package savehist
+        :straight nil
+        :hook (after-init . savehist-mode))
+
+      (use-package corfu
+        :init (global-corfu-mode)
+        :bind (:map corfu-map ("<tab>" . corfu-complete))
+        :custom
+        (tab-always-indent 'complete)
+        (corfu-preview-current nil)
+        (corfu-min-width 20)
+        (corfu-auto t)
+        (corfu-auto-prefix 2)
+        (corfu-cycle t)
+        (setq corfu-popupinfo-delay '(1.25 . 0.5))
+        (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
+
+        ;; Sort by input history (no need to modify `corfu-sort-function').
+        (with-eval-after-load 'savehist
+          (corfu-history-mode 1)
+          (add-to-list 'savehist-additional-variables 'corfu-history)))
+
+
+    (use-package cape
+      ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+      ;; Press C-c p ? to for help.
+      :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+      ;; Alternatively bind Cape commands individually.
+      ;; :bind (("C-c p d" . cape-dabbrev)
+      ;;        ("C-c p h" . cape-history)
+      ;;        ("C-c p f" . cape-file)
+      ;;        ...)
+      :init
+      ;; Add to the global default value of `completion-at-point-functions' which is
+      ;; used by `completion-at-point'.  The order of the functions matters, the
+      ;; first function returning a result wins.  Note that the list of buffer-local
+      ;; completion functions takes precedence over the global list.
+      (add-hook 'completion-at-point-functions #'cape-dabbrev)
+      (add-hook 'completion-at-point-functions #'cape-file)
+      (add-hook 'completion-at-point-functions #'cape-elisp-block)
+      ;; (add-hook 'completion-at-point-functions #'cape-history)
+      ;; ...
+    )
+      (use-package embark
+        :ensure t
+
+        :bind
+        (("C-," . embark-act)         ;; pick some comfortable binding
+         ("C-;" . embark-dwim)        ;; good alternative: M-.
+         ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+        :init
+
+        ;; Optionally replace the key help with a completing-read interface
+        (setq prefix-help-command #'embark-prefix-help-command)
+
+        :config
+        (vertico-multiform-mode)
+        (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
+
+        ;; Hide the mode line of the Embark live/completions buffers
+        (add-to-list 'display-buffer-alist
+                     '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                       nil
+                       (window-parameters (mode-line-format . none)))))
+
+      ;; Consult users will also want the embark-consult package.
+      (use-package embark-consult
+        :ensure t
+        :after (embark consult)
+        :demand t ; only necessary if you have the hook below
+        ;; if you want to have consult previews as you move around an
+        ;; auto-updating embark collect buffer
+        :hook
+        (embark-collect-mode . consult-preview-at-point-mode))
+
+      ;;; Development Tools & Features
+
+         (use-package vterm)
+
+          ;; Git integration
+         (use-package magit
+            :commands magit-status)
+
+         (setq-default ispell-program-name "hunspell")
+
+         
+          ;; LSP support using built-in eglot
+         (use-package eglot
+           :straight nil
+           :hook ((python-ts-mode . eglot-ensure)  ; Python
+             (r-mode . eglot-ensure)           ; R
+             (css-mode . eglot-ensure)         ; CSS
+             (html-mode . eglot-ensure)        ; HTML
+             (web-mode . eglot-ensure))        ; Web templates
+           :config
+            ;; Configure LSP servers
+            (add-to-list 'eglot-server-programs '(python-ts-mode . ("pylsp")))
+            (add-to-list 'eglot-server-programs '(r-mode . ("R" "--slave" "-e" "languageserver::run()")))
+            (add-to-list 'eglot-server-programs '(web-mode . ("vscode-html-language-server" "--stdio")))
+            (setq eglot-autoshutdown t  ; Shutdown server when last buffer is killed
+      	    eglot-sync-connect nil))  ; Don't block on connection
+;; try this later so that pylsp is running from uv
+ ;; `((python-ts-mode python-mode) . ("uv" "tool" "run" "--from" "python-lsp-server[all]" "pylsp")))
+
+  ;; Syntax checking
+         (use-package flycheck
+            :init (global-flycheck-mode))
+
+         (use-package flycheck-eglot
+  	 :ensure t
+  	 :after (flycheck eglot)
+  	 :config
+  	 (global-flycheck-eglot-mode 1))
+
+         (use-package yasnippet
+            :init (yas-global-mode 1))
+
+         (use-package yasnippet-snippets) ;; Collection of snippets
+
+          ;; Delete the selected text upon text insertion
+         (use-package delsel
+            :straight nil ; no need to install it as it is built-in
+            :hook (after-init . delete-selection-mode))
+
+         (use-package treesit-auto
+            :custom
+            (treesit-auto-install 'prompt)
+            :config
+            (treesit-auto-add-to-auto-mode-alist 'all)
+            (global-treesit-auto-mode))
 
 ;;; eshell customization
 (use-package eshell
@@ -528,42 +545,69 @@
   :bind ("C-c e" . eshell)
   :config
   ;; Better prompt
-  (setq eshell-prompt-regexp "^[^#$\n]* [#$] "
-        eshell-prompt-function
-        (lambda ()
-          (concat
-           (abbreviate-file-name (eshell/pwd))
-           (if (= (user-uid) 0) " # " " $ ")))))
+    (defun my/eshell-prompt ()
+    (concat
+     ;; Directory
+     (propertize (abbreviate-file-name (eshell/pwd)) 
+                 'face '(:foreground "cyan"))
+     ;; Git branch if in repo
+     (when-let ((branch (magit-get-current-branch)))
+       (propertize (format " (%s)" branch) 
+                   'face '(:foreground "green")))
+     ;; Prompt symbol
+     (if (= (user-uid) 0) " # " " $ ")))
+  
+  (setq eshell-prompt-function #'my/eshell-prompt)
 
-;;;; Python
-    (use-package python
-      :mode ("\\.py\\'" . python-mode)
-      :config
-      (setq python-indent-offset 4)
-      (setq python-shell-completion-native-enable nil))
+  ;; History settings
+  (setq eshell-history-size 10000
+        eshell-hist-ignoredups t
+        eshell-save-history-on-exit t
+        eshell-history-file-name 
+        (expand-file-name "eshell/history" user-emacs-directory))
+  
+  ;; Scrolling behavior  
+  (setq eshell-scroll-to-bottom-on-input t
+        eshell-scroll-show-maximum-output t
+        eshell-buffer-maximum-lines 10000)
 
-(require 'treesit)
+;; Prefer Emacs commands over external
+  (setq eshell-prefer-lisp-functions t
+        eshell-prefer-lisp-variables t)
+  
+ ;; Enable smart mode (optional - try without first)
+;; Load the smart module
+  (require 'em-smart)
+  
+  ;; Add it to modules list
+  (add-to-list 'eshell-modules-list 'eshell-smart)
 
-(use-package uv
-  :straight (uv :type git :host github :repo "johannes-mueller/uv.el")
-  :init
-  (add-to-list 'treesit-language-source-alist '(toml "https://github.com/tree-sitter-grammars/tree-sitter-toml"))
-  (unless (treesit-language-available-p 'toml)
-    (treesit-install-language-grammar 'toml)))
+  ;; Better completion
+  (setq eshell-cmpl-ignore-case t))
 
-(use-package py-vterm-interaction
-  :hook (python-mode . py-vterm-interaction-mode)
-  :config
-  ;;; Suggested:
-  ;; (setq-default py-vterm-interaction-repl-program "ipython")
-  ;; (setq-default py-vterm-interaction-silent-cells t)
-  )
+    ;;;; Python
+      (use-package python
+        :straight nil
+	:init
+	:config
+        (setq python-indent-offset 4)
+        (setq python-shell-completion-native-enable nil))
 
-(use-package flycheck-eglot
-  :ensure t
-  :after (flycheck eglot)
-  :config
-  (global-flycheck-eglot-mode 1))
+  (use-package uv
+    :straight (uv :type git :host github :repo "johannes-mueller/uv.el")
+    :init
+    (add-to-list 'treesit-language-source-alist '(toml "https://github.com/tree-sitter-grammars/tree-sitter-toml"))
+    (unless (treesit-language-available-p 'toml)
+      (treesit-install-language-grammar 'toml)))
+
+  (use-package py-vterm-interaction
+    :after python
+    :hook (python-ts-mode . py-vterm-interaction-mode)
+    :config
+    ;;; Suggested:
+    ;; (setq-default py-vterm-interaction-repl-program "ipython")
+    ;;(setq-default py-vterm-interaction-silent-cells t)
+    )
 
 ;;;; R support
 
@@ -633,28 +677,28 @@
   (use-package emmet-mode
     :hook (web-mode . emmet-mode))
 
-;;;; data work formats
+  ;;;; data work formats
 
-  ;; CSV/TSV file handling
-  (use-package csv-mode
-    :mode "\\.csv\\'")
+    ;; CSV/TSV file handling
+    (use-package csv-mode
+      :mode "\\.csv\\'")
 
-  ;; Support for markdown docs
-  (use-package markdown-mode
-    :mode ("README\\.md\\'" . gfm-mode)
-    :mode ("\\.md\\'" . markdown-mode))
+    ;; Support for markdown docs
+    (use-package markdown-mode
+      :mode ("README\\.md\\'" . gfm-mode)
+      :mode ("\\.md\\'" . markdown-mode))
 
-  ;; Hledger
-  (use-package ledger-mode
-    :custom
-    ((ledger-binary-path "hledger")
-     (ledger-mode-should-check-version nil)
-     (ledger-report-auto-width nil)
-     (ledger-report-links-in-register nil)
-     (ledger-report-native-highlighting-arguments '("--color=always")))
-    :mode ("\\.hledger\\'" "\\.ledger\\'"))
+    ;; Hledger
+    (use-package ledger-mode
+      :custom
+      ((ledger-binary-path "hledger")
+       (ledger-mode-should-check-version nil)
+       (ledger-report-auto-width nil)
+       (ledger-report-links-in-register nil)
+       (ledger-report-native-highlighting-arguments '("--color=always")))
+      :mode ("\\.hledger\\'" "\\.ledger\\'"))
 
-;;; Org Mode Configuration
+    ;;; Org Mode Configuration
 
       (use-package org
 
@@ -879,31 +923,31 @@
 
     (dired-preview-global-mode 1))
 
-(use-package bibtex
-  :custom
-  (bibtex-user-optional-fields
-   '(("keywords" "Keywords to describe the entry" "")
-     ("file"     "Relative or absolute path to attachments" "" )))
-  (bibtex-align-at-equal-sign t)
-  :config
-  (ews-bibtex-register)
-  :bind
-  (("C-c b r" . ews-bibtex-register)))
+    (use-package bibtex
+    :custom
+    (bibtex-user-optional-fields
+     '(("keywords" "Keywords to describe the entry" "")
+       ("file"     "Relative or absolute path to attachments" "" )))
+    (bibtex-align-at-equal-sign t)
+    :config
+    (ews-bibtex-register)
+    :bind
+    (("C-c b r" . ews-bibtex-register)))
 
-;; Biblio package for adding BibTeX records
+  ;; Biblio package for adding BibTeX records
 
-(use-package biblio
-  :bind
-  (("C-c b b" . ews-bibtex-biblio-lookup)))
+  (use-package biblio
+    :bind
+    (("C-c b b" . ews-bibtex-biblio-lookup)))
 
-;; Citar to access bibliographies
+  ;; Citar to access bibliographies
 
-(use-package citar
-  :defer t
-  :custom
-  (citar-bibliography ews-bibtex-files))
+  (use-package citar
+    :defer t
+    :custom
+    (citar-bibliography ews-bibtex-files))
 
-;;; Denote
+  ;;; Denote
    (use-package denote
       :custom
       (denote-sort-keywords t)
