@@ -169,9 +169,9 @@
 (setq split-width-threshold 120
       split-height-threshold nil)
 
-(use-package balanced-windows
-  :config
-  (balanced-windows-mode 1))
+;(use-package balanced-windows
+;  :config
+;  (balanced-windows-mode 1))
 
 (use-package popper
   :straight t
