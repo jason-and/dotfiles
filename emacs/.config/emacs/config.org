@@ -216,17 +216,33 @@
 (use-package doric-themes)
 
 (use-package theme-buffet
-  :after (modus-themes ef-themes doric-themes)  ; add your favorite themes here
-  :init
-  :functions calendar-current-time-zone
-  theme-buffet-modus-ef theme-buffet-timer-hours
+  :after (modus-themes ef-themes doric-themes)
   :config
   (require 'cal-dst)
+  
+  ;; Auto-adjust for DST
   (setopt theme-buffet-time-offset
           (1+ (/ (cadr (calendar-current-time-zone)) 60)))
-  (theme-buffet-timer-hours 1)
-  (theme-buffet-modus-ef)
+  
+  ;; Custom theme schedule (6 periods = 4 hours each)
+  ;; Adjust the number of periods to change the division
+  (setopt theme-buffet-end-user
+          '(:night     (modus-vivendi ef-dark ef-autumn ef-night ef-duo-dark ef-symbiosis)
+            :dawn      (ef-frost ef-winter)
+            :morning   (modus-operandi ef-light ef-cyprus ef-spring ef-duo-light)
+            :afternoon (modus-operandi-tinted ef-arbutus ef-day ef-kassio ef-summer ef-elea-light ef-maris-light ef-melissa-light ef-trio-light ef-reverie)
+            :evening   (modus-vivendi-tinted ef-rosa ef-elea-dark ef-maris-dark ef-melissa-dark ef-trio-dark ef-dream)
+            :dusk      (ef-bio ef-duo-dark)))
+  
+  ;; Use your custom configuration
+  (setq theme-buffet-menu 'end-user)
+  
+  ;; Start period-based switching
+  (theme-buffet-end-user)
+  
+  ;; Enable mode
   (theme-buffet-mode 1))
+
 
 (use-package nerd-icons)
 
@@ -407,10 +423,11 @@
   :config
   (which-key-mode)
   :custom
-  (which-key-max-description-length 40)
+  (which-key-max-description-length 80)
   (which-key-lighter nil)
   (which-key-sort-order 'which-key-description-order)
-  (which-key-setup-side-window-right-bottom))
+  (which-key-side-window-location 'bottom)
+  (which-key-popup-type 'minibuffer))
 #+END_SRC
 * Completion Framework
 ** Vertico, Marginalia, and Orderless
@@ -423,13 +440,31 @@
 (use-package vertico
   :config (vertico-mode))
 
+
+;; Emacs minibuffer configurations.
+(use-package emacs
+  :custom
+  ;; Enable context menu. `vertico-multiform-mode' adds a menu in the minibuffer
+  ;; to switch display modes.
+  (context-menu-mode t)
+  ;; Support opening new minibuffers from inside existing minibuffers.
+  (enable-recursive-minibuffers t)
+  ;; Hide commands in M-x which do not work in the current mode.  Vertico
+  ;; commands are hidden in normal buffers. This setting is useful beyond
+  ;; Vertico.
+  ; (read-extended-command-predicate #'command-completion-default-include-p)
+  ;; Do not allow the cursor in the minibuffer prompt
+  (minibuffer-prompt-properties
+   '(read-only t cursor-intangible t face minibuffer-prompt)))
+
+
 ;; vertico uses posframe (frame in center of screen)
 (use-package vertico-posframe
-  :init(vertico-posframe-mode 1))
+  :init (vertico-posframe-mode 1))
 
 ;; adds helpful info about options in minibuffer
 (use-package marginalia
-  :init (marginalia-mode))
+  :init (marginalia-mode 1))
 
 (use-package orderless
   :custom
@@ -452,6 +487,7 @@
 
 (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
 #+END_SRC
+
 ** Consult, Corfu, and Embark
 :PROPERTIES:
 :ID:       2bb91e07-ffaa-4208-9894-aa7315b951ce
@@ -470,9 +506,14 @@
 
 (use-package corfu
   :init (global-corfu-mode)
-  :bind (:map corfu-map ("<tab>" . corfu-complete))
+  :bind (:map corfu-map
+	      ("<tab>" . corfu-complete)
+	      ("TAB" . corfu-complete)
+	      ("RET" . nil)
+	      )
   :custom
   (tab-always-indent 'complete)
+  (corfu-preselect 'prompt)
   (corfu-preview-current nil)
   (corfu-min-width 20)
   (corfu-auto t)
@@ -485,7 +526,6 @@
   (with-eval-after-load 'savehist
     (corfu-history-mode 1)
     (add-to-list 'savehist-additional-variables 'corfu-history)))
-
 
 (use-package cape
   ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
@@ -509,14 +549,12 @@
   )
 (use-package embark
   :ensure t
-
   :bind
   (("C-," . embark-act)         ;; pick some comfortable binding
    ("C-;" . embark-dwim)        ;; good alternative: M-.
-   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+   ("C-h b" . embark-bindings)) ;; alternative for `describe-bindings'
 
   :init
-
   ;; Optionally replace the key help with a completing-read interface
   (setq prefix-help-command #'embark-prefix-help-command)
 
@@ -540,6 +578,8 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 #+END_SRC
+
+
 * Development Tools and Features
 ** Magit, LSP, Treesitter, etc
 :PROPERTIES:
@@ -616,7 +656,7 @@
     (concat
      ;; Directory
      (propertize (abbreviate-file-name (eshell/pwd))
-                 'face '(:foreground "cyan"))
+                 'face '(:foreground "purple"))
      ;; Git branch if in repo
      (when-let ((branch (magit-get-current-branch)))
        (propertize (format " (%s)" branch)
@@ -785,102 +825,124 @@
    (ledger-report-links-in-register nil)
    (ledger-report-native-highlighting-arguments '("--color=always")))
   :mode ("\\.hledger\\'" "\\.ledger\\'"))
-#+END_SRC
-* Org Mode Config
-:PROPERTIES:
-:ID:       8b39e750-48d7-45f7-a8e1-8c092bfdf21a
-:END:
-#+BEGIN_SRC emacs-lisp
-    ;;; Org Mode Configuration
-
+#+end_src
+* org mode config
+:properties:
+:ID:       034e58ad-6d40-477a-9a7a-c16a566a943c
+:end:
+#+begin_src 
+;;; Org Mode Configuration
 (use-package org
-
   :config
-  (setq org-confirm-babel-evaluate nil)
-  ;; Enable code blocks for languages you use
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((python . t)
-     (R . t)
-     (emacs-lisp . t)))
-
-  ;; src block templates
-  (setq org-structure-template-alist
-  	'(("s" . "src")
-
-          ;; Emacs Lisp
-          ("e" . "src emacs-lisp")
-          ("E" . "src emacs-lisp :results value code :lexical t")
-
-          ;; Python
-          ("p" . "src python")
-          ("po" . "src python :results output")
-          ("ps" . "src python :session :results output")
-
-          ;; R
-          ("r" . "src R\n")
-          ("rp" . "src R :results output graphics file :file plot.png\n\n")
-
-          ;; Bash
-          ("b" . "src bash")
-          ("sh" . "src sh :results output")
-
-          ;; Documentation
-          ("x" . "example")
-          ("q" . "quote")
-          ("v" . "verse")))
-
-  (setq org-babel-default-header-args:R
-        '((:session . "*R*")           ; Use persistent R session by default
-          (:results . "output")         ; Show R console output
-          (:exports . "both")           ; Export both code and results
-          (:cache . "no")               ; Don't cache results (for interactive work)
-          (:prologue . "options(crayon.enabled = FALSE, cli.num_colors = 1)")
-          (:tangle . "no")))
-
-  (setq org-src-fontify-natively t
-  	org-src-tab-acts-natively t
-  	org-src-preserve-indentation t)
-
-  ;; Capture templates
-  (setq org-capture-templates
-        '(
-  	  ("i" "Inbox" entry
-           (file+headline "~/Documents/notes/inbox.org" "Inbox")
-           "*  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
-           :empty-lines 1)
-
-          ("t" "Todo" entry
-           (file+headline "~/Documents/notes/inbox.org" "Tasks")
-           "* TODO  %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
-           :empty-lines 1)))
-
-  ;; Agenda files
-  (setq org-agenda-files '("~/Documents/notes"))
-
-  ;; Global keybindings
+  ;; Global keybindings (set early so they're available)
   (global-set-key (kbd "C-c c") 'org-capture)
   (global-set-key (kbd "C-c a") 'org-agenda)
   (global-set-key (kbd "C-c l") 'org-store-link)
 
   :custom
+  ;; Appearance
   (org-startup-indented t)
-  (org-M-RET-may-split-line '((default . nil)))
-  (org-insert-heading-respect-content t)
   (org-hide-emphasis-markers t)
   (org-startup-with-inline-images t)
   (org-image-actual-width '(450))
   (org-pretty-entities t)
   (org-use-sub-superscripts "{}")
-  (org-id-link-to-org-use-id t)
+
+  ;; Editing behavior
+  (org-M-RET-may-split-line '((default . nil)))
+  (org-insert-heading-respect-content t)
   (org-return-follows-link t)
-  (org-fold-catch-invisible-edits t))
+  (org-fold-catch-invisible-edits 'show-and-error)
 
-;; Nice bullets instead of asterisks
-(use-package org-bullets
-  :hook (org-mode . org-bullets-mode))
+  ;; Links
+  (org-id-link-to-org-use-id t))
+#+end_src
 
-;; get rid of ansi characters in output of R Babel blocks
+** Org Babel (Code Blocks)
+:PROPERTIES:
+:ID:       org-babel
+:END:
+
+Configuration for executing code within org documents.
+
+*** Language Support
+:PROPERTIES:
+:ID:       83309260-d7d5-411e-94df-a89a0f73c6f7
+:END:
+#+begin_src emacs-lisp
+(use-package org
+  :config
+  ;; Don't ask for confirmation when executing code blocks
+  (setq org-confirm-babel-evaluate nil)
+
+  ;; Enable languages for babel
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)
+     (R . t)
+     (emacs-lisp . t)
+     (shell . t)))
+
+  ;; Source block editing behavior
+  (setq org-src-fontify-natively t      ; Syntax highlight in src blocks
+        org-src-tab-acts-natively t     ; Tab works like in the language's major mode
+        org-src-preserve-indentation t  ; Don't add extra indentation
+        org-edit-src-content-indentation 0))
+#+end_src
+
+*** Source Block Templates
+:PROPERTIES:
+:ID:       44cee3f7-f81b-4708-9408-3b84f588e6d2
+:END:
+These let you type =<r= then =TAB= to insert a code block.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (setq org-structure-template-alist
+        '(("s" . "src")
+          ;; Emacs Lisp (lowercase e for simple, uppercase E for fancy)
+          ("e" . "src emacs-lisp")
+          ("E" . "src emacs-lisp :results value code :lexical t")
+          ;; Python
+          ("p" . "src python")
+          ("po" . "src python :results output")
+          ("ps" . "src python :session :results output")
+          ;; R
+          ("r" . "src R")
+          ("rp" . "src R :results output graphics file :file plot.png")
+          ;; Shell
+          ("b" . "src bash")
+          ("sh" . "src shell :results output")
+          ;; Documentation blocks
+          ("x" . "example")
+          ("q" . "quote")
+          ("v" . "verse"))))
+#+end_src
+
+*** R-Specific Babel Settings
+:PROPERTIES:
+:ID:       50ba0df7-45cb-4d8c-9d4a-af1bf0d3f967
+:END:
+Default header arguments for R code blocks.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (setq org-babel-default-header-args:R
+        '((:session . "*R*")           ; Use persistent R session
+          (:results . "output")        ; Show console output
+          (:exports . "both")          ; Export code and results
+          (:cache . "no")              ; Don't cache (for interactive work)
+          (:prologue . "options(crayon.enabled = FALSE, cli.num_colors = 1)")
+          (:tangle . "no"))))
+#+end_src
+
+*** ANSI Color Handling
+:PROPERTIES:
+:ID:       0221fbe3-ee66-4beb-b179-ad613bc99818
+:END:
+Removes ugly escape codes from R output (like from tidyverse messages).
+
+#+begin_src emacs-lisp
 (defun my/babel-ansi-colorize-results ()
   "Apply ANSI color escape sequences to Org Babel results."
   (when-let ((beg (org-babel-where-is-src-block-result nil nil)))
@@ -892,11 +954,128 @@
           (ansi-color-apply-on-region beg end))))))
 
 (add-hook 'org-babel-after-execute-hook 'my/babel-ansi-colorize-results)
+#+end_src
 
+** Org Capture & Agenda
+:PROPERTIES:
+:ID:       org-capture-agenda
+:END:
+
+*** Capture Templates
+:PROPERTIES:
+:ID:       9d8187df-234c-4b7e-b798-5d27ab9de495
+:END:
+Quick capture for ideas and tasks.
+
+#+begin_src emacs-lisp
+(use-package org
+  :config
+  (setq org-capture-templates
+        '(("i" "Inbox" entry
+           (file+headline "~/Documents/notes/inbox.org" "Inbox")
+           "* %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
+           :empty-lines 1)
+
+          ("t" "Todo" entry
+           (file+headline "~/Documents/notes/inbox.org" "Tasks")
+           "* TODO %?\n:PROPERTIES:\n:CAPTURED: %U\n:END:\n\nContext: %a"
+           :empty-lines 1))))
+#+end_src
+
+*** Agenda Configuration
+:PROPERTIES:
+:ID:       f71b305d-9ac4-42eb-935e-41a2a8571026
+:END:
+#+begin_src emacs-lisp
+(use-package org
+  :config
+  (setq org-agenda-files '("~/Documents/notes")))
+#+end_src
+
+*** TO-DO Keywords
+:PROPERTIES:
+:ID:       28ea1410-d78f-4de1-b036-2d5579a52ab0
+:END:
+#+begin_src emacs-lisp
+(use-package org
+  :config
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)" "CANCELLED(c@/!)")
+          (sequence "GOAL(g)" "|" "ACHIEVED(a!)" "ABANDONED(x@/!)")))
+
+  ;; Log when tasks are completed
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t))
+#+end_src
+
+*** Archive Settings
+:PROPERTIES:
+:ID:       153e1e24-6a40-4aad-9af3-04a485489470
+:END:
+#+begin_src emacs-lisp
+(use-package org
+  :config
+  (setq org-archive-location "~/Documents/notes/archive.org::datetree/"))
+#+end_src
+
+*** Dedicated Agenda Frame
+:PROPERTIES:
+:ID:       e9106a37-3635-45f9-8cdf-817a872f0b5b
+:END:
+Opens agenda in its own frame (useful with your daemon setup).
+
+#+begin_src emacs-lisp
+(defun my/dedicated-agenda-frame ()
+  "Open org-agenda in a clean, dedicated frame."
+  (interactive)
+  (let ((display-buffer-alist
+         '((".*" (display-buffer-same-window)))))
+    (with-selected-frame (make-frame '((name . "*Org Agenda*")))
+      (switch-to-buffer "*scratch*")
+      (delete-other-windows)
+      (org-agenda nil "a"))))
+#+end_src
+
+** Org Visual Enhancements
+:PROPERTIES:
+:ID:       org-visual
+:END:
+
+*** Org Bullets
+:PROPERTIES:
+:ID:       63301f59-6e22-46a1-b50f-4d1f276b1290
+:END:
+Pretty bullets instead of asterisks.
+
+#+begin_src emacs-lisp
+(use-package org-bullets
+  :hook (org-mode . org-bullets-mode))
+#+end_src
+
+*** Org Modern
+:PROPERTIES:
+:ID:       d6417ee8-5a54-454d-91ef-77ed144eeb6a
+:END:
+A more comprehensive visual overhaul.
+
+#+begin_src emacs-lisp
 (use-package org-modern
-  :hook
-  (org-mode . org-modern-mode))
-#+END_SRC
+  :hook (org-mode . org-modern-mode))
+#+end_src
+
+*** Block Completion
+:PROPERTIES:
+:ID:       b1f0a8d8-3901-4ff8-b7f2-27bc0a002b1e
+:END:
+Autocomplete for source block languages.
+
+#+begin_src emacs-lisp
+(use-package org-block-capf
+  :straight (org-block-capf :type git :host github :repo "xenodium/org-block-capf")
+  :hook (org-mode . org-block-capf-add-to-completion-at-point-functions))
+#+end_src
+#+RESULTS:
+| #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | org-modern-mode | org-block-capf-add-to-completion-at-point-functions | org-bullets-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | #[nil ((display-line-numbers-mode 0)) (t)] |
 
 * General Settings
 :PROPERTIES:
