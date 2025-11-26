@@ -32,7 +32,7 @@
 (setq straight-use-package-by-default t)
 
 ;; add project and flymake to the pseudo-packages variable so straight.el doesn't download a separate version than what eglot downloads.
-(setq straight-built-in-pseudo-packages '(emacs nadvice python image-mode project flymake org org-element org-loaddefs))
+(setq straight-built-in-pseudo-packages '(emacs nadvice eglot python image-mode project flymake org org-element org-loaddefs))
 
 ;; stop warnings when installing packages
 
@@ -164,7 +164,6 @@
   (popper-echo-mode +1))                ; For echo area hints
 
 (use-package modus-themes
-  :ensure t
   :config
   (mapc #'disable-theme custom-enabled-themes)
   (setq modus-themes-italic-constructs t
@@ -174,12 +173,12 @@
   (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 
 (use-package ef-themes
-  :ensure t
   :config
   (setq ef-themes-to-toggle '(ef-day ef-owl))
   (load-theme 'ef-day :no-confirm-loading))
 
-(use-package doric-themes)
+(use-package doric-themes
+  :defer t)
 
 (use-package theme-buffet
   :after (modus-themes ef-themes doric-themes)
@@ -324,7 +323,6 @@
   :bind ("C-c f" . fontaine-set-preset))
 
 (use-package show-font
-  :ensure t
   :bind
   (("C-c s f" . show-font-select-preview)
    ("C-c s t" . show-font-tabulated)))
@@ -482,7 +480,6 @@
   ;; ...
   )
 (use-package embark
-  :ensure t
   :bind
   (("C-," . embark-act)         ;; pick some comfortable binding
    ("C-;" . embark-dwim)        ;; good alternative: M-.
@@ -504,7 +501,6 @@
 
 ;; Consult users will also want the embark-consult package.
 (use-package embark-consult
-  :ensure t
   :after (embark consult)
   :demand t ; only necessary if you have the hook below
   ;; if you want to have consult previews as you move around an
@@ -526,7 +522,7 @@
 (use-package eglot
   :straight nil
   :hook ((python-ts-mode . eglot-ensure)  ; Python
-         (r-mode . eglot-ensure)           ; R
+         ;(r-mode . eglot-ensure)           ; R
          (css-mode . eglot-ensure)         ; CSS
          (html-mode . eglot-ensure)        ; HTML
          (web-mode . eglot-ensure))        ; Web templates
@@ -545,7 +541,6 @@
   :init (global-flycheck-mode))
 
 (use-package flycheck-eglot
-  :ensure t
   :after (flycheck eglot)
   :config
   (global-flycheck-eglot-mode 1))
@@ -651,21 +646,28 @@
   (insert " |> "))
 
 (use-package ess
-  :defer t
   :commands (R r ess-r-mode)
-  :bind (:map ess-r-mode-map
-              ("M--" . my/insert-r-assignment)
-              ("C-S-m" . my/insert-r-pipe-native))
-  :init 
-  (require 'ess-site)
-  :config
+  :mode (("\\.R\\'" . ess-r-mode)
+         ("\\.r\\'" . ess-r-mode)
+         ("\\.Rmd\\'" . poly-markdown+r-mode))
+    :custom
   (setq ess-ask-for-ess-directory nil)
   (setq ess-local-process-name "R")
   (setq ess-use-flymake nil)
   (setq ess-use-eldoc nil)
   (setq ess-eldoc-show-on-symbol nil)
   (setq inferior-R-args "--no-save --no-restore-data --quiet")
-)
+  :config
+  (setq ess-history-file nil) 
+  (setq ess-idle-timer-interval 0.5)
+
+  (define-key ess-r-mode-map (kbd "M--") #'my/insert-r-assignment)
+  (define-key ess-r-mode-map (kbd "C-S-m") #'my/insert-r-pipe-native)
+  
+  ;; Also bind in the inferior (REPL) buffer
+  (define-key inferior-ess-r-mode-map (kbd "M--") #'my/insert-r-assignment)
+  (define-key inferior-ess-r-mode-map (kbd "C-S-m") #'my/insert-r-pipe-native))
+
 
 ;; (defun my/start-httpgd ()
 ;;   "Start httpgd server for R plotting."
@@ -682,19 +684,21 @@
   :hook (ess-r-post-run . ess-plot-on-startup-h))
 
 (use-package format-all
-  :hook (ess-r-mode . format-all-mode)
+  :commands (format-all-buffer)
   :config
   (setq-default format-all-formatters '(("R" styler))))
 
 (use-package ess-view-data
   :after ess
-  (require 'ess-view-data))
+  :commands (ess-view-data-print))
 
 (use-package poly-R
-  :ensure t)
+  :defer t
+  :mode (("\\.Rmd\\'" . poly-markdown+r-mode)))
 
 (use-package quarto-mode
-  :ensure t)
+  :defer t
+  :mode ("\\.qmd\\'" . quarto-mode))
 
 ;;;; Web development
 (use-package web-mode
@@ -864,9 +868,6 @@
       (delete-other-windows)
       (org-agenda nil "a"))))
 
-(use-package org-bullets
-  :hook (org-mode . org-bullets-mode))
-
 (use-package org-modern
   :hook (org-mode . org-modern-mode))
 
@@ -890,12 +891,8 @@
 ;;recent files
 (recentf-mode 1)
 
-;;saves sessions
-(desktop-save-mode 1)
-
 ;;comand history settings
 (setq history-length 25)
-(savehist-mode 1)
 
 ;; remember and restore the last cursor location of opened files
 (save-place-mode 1)
@@ -903,7 +900,6 @@
 ;;revert buffers when the file has been changed
 (global-auto-revert-mode 1)
 
-;;dired sees file changes
 (setq global-auto-revert-non-file-buffers t)
 
 ;; move customization variables to a separate file and load it
@@ -1031,8 +1027,7 @@
    ("C-c n r" . denote-rename-file)
    ("C-c n l" . denote-link)
    ("C-c n b" . denote-backlinks)
-   ("C-c n d" . denote-dired)
-   ("C-c n g" . denote-grep))
+   ("C-c n d" . denote-dired))
   :config
   (setq denote-directory (expand-file-name "~/Documents/notes/"))
   (denote-rename-buffer-mode 1)
@@ -1046,8 +1041,7 @@
   (("C-c n o h" . denote-org-link-to-heading)
    ("C-c n o s" . denote-org-extract-subtree)))
 
-(use-package denote-markdown
-  :ensure t)
+(use-package denote-markdown)
 
 ;; Consult-Notes for easy access to notes
 
@@ -1061,7 +1055,6 @@
   (consult-notes-denote-mode))
 
 (use-package consult-denote
-  :ensure t
   :bind
   (("C-c n f" . consult-denote-find)
    ("C-c n g" . consult-denote-grep))
@@ -1069,7 +1062,6 @@
   (consult-denote-mode 1))
 
 (use-package denote-sequence
-  :ensure t
   :bind
   ( :map global-map
     ;; Here we make "C-c n s" a prefix for all "[n]otes with [s]equence".
