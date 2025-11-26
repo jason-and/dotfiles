@@ -44,7 +44,7 @@
 (setq straight-use-package-by-default t)
 
 ;; add project and flymake to the pseudo-packages variable so straight.el doesn't download a separate version than what eglot downloads.
-(setq straight-built-in-pseudo-packages '(emacs nadvice python image-mode project flymake))
+(setq straight-built-in-pseudo-packages '(emacs nadvice python image-mode project flymake org org-element org-loaddefs))
 
 ;; stop warnings when installing packages
 
@@ -124,7 +124,7 @@
 
 (use-package ews
   :straight nil
-  :load-path "~/.config/emacs/")
+  :load-path "~/.config/emacs/lisp")
 #+END_SRC
 
 * UI Configuration
@@ -610,7 +610,7 @@
   (add-to-list 'eglot-server-programs '(r-mode . ("R" "--slave" "-e" "languageserver::run()")))
   (add-to-list 'eglot-server-programs '(web-mode . ("vscode-html-language-server" "--stdio")))
   (setq eglot-autoshutdown t  ; Shutdown server when last buffer is killed
-      	eglot-sync-connect nil))  ; Don't block on connection
+        eglot-sync-connect nil))  ; Don't block on connection
 ;; try this later so that pylsp is running from uv
 ;; `((python-ts-mode python-mode) . ("uv" "tool" "run" "--from" "python-lsp-server[all]" "pylsp")))
 
@@ -641,7 +641,7 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 #+END_SRC
-** shell
+** eshell
 :PROPERTIES:
 :ID:       1f089cdd-3afe-4804-a5ea-dcd219f0ae4a
 :END:
@@ -741,22 +741,31 @@
   (insert " |> "))
 
 (use-package ess
+  :defer t
+  :commands (R r ess-r-mode)
   :bind (:map ess-r-mode-map
-    	      ("M--" . my/insert-r-assignment)  ; Alt + hyphen
-              ("C-c p" . my/insert-r-pipe-native)) ; Ctrl+c p for |>
-  :init
+              ("M--" . my/insert-r-assignment)
+              ("C-S-m" . my/insert-r-pipe-native))
+  :init 
   (require 'ess-site)
   :config
-  ;; Optional: Add command line arguments if needed
+  (setq ess-ask-for-ess-directory nil)
+  (setq ess-local-process-name "R")
+  (setq ess-use-flymake nil)
+  (setq ess-use-eldoc nil)
+  (setq ess-eldoc-show-on-symbol nil)
   (setq inferior-R-args "--no-save --no-restore-data --quiet")
-  (add-hook 'ess-r-mode-hook
-            (lambda ()
-              ;; Start httpgd server when R starts
-              (add-hook 'inferior-ess-mode-hook
-                        (lambda ()
-                          (ess-eval-linewise "httpgd::hgd(host='127.0.0.1', port=8888)")
-                          (browse-url "http://127.0.0.1:8888/live"))
-                        nil t))))
+)
+
+;; (defun my/start-httpgd ()
+;;   "Start httpgd server for R plotting."
+;;   (interactive)
+;;   (ess-eval-linewise "if (!httpgd::hgd_url()) httpgd::hgd(host='127.0.0.1', port=8888)")
+;;   (browse-url "http://127.0.0.1:8888/live"))
+;; 
+;; ;; Bind to a key
+;; (with-eval-after-load 'ess-r-mode
+;;   (define-key ess-r-mode-map (kbd "C-c C-g") #'my/start-httpgd))
 
 (use-package ess-plot
   :straight (ess-plot :type git :host github :repo "DennieTeMolder/ess-plot")
@@ -777,6 +786,9 @@
 (use-package quarto-mode
   :ensure t)
 #+END_SRC
+
+#+RESULTS:
+
 ** Web Development
 :PROPERTIES:
 :ID:       0b162172-ac9f-4f08-9fa1-9e96cc34c800
@@ -830,9 +842,10 @@
 :properties:
 :ID:       034e58ad-6d40-477a-9a7a-c16a566a943c
 :end:
-#+begin_src 
+#+begin_src emacs-lisp
 ;;; Org Mode Configuration
 (use-package org
+  :straight nil
   :config
   ;; Global keybindings (set early so they're available)
   (global-set-key (kbd "C-c c") 'org-capture)
@@ -1266,8 +1279,8 @@ Autocomplete for source block languages.
 
 (use-package denote-org
   :bind
-  (("C-c n d h" . denote-org-link-to-heading)
-   ("C-c n d s" . denote-org-extract-subtree)))
+  (("C-c n o h" . denote-org-link-to-heading)
+   ("C-c n o s" . denote-org-extract-subtree)))
 
 (use-package denote-markdown
   :ensure t)
@@ -1290,6 +1303,7 @@ Autocomplete for source block languages.
    ("C-c n g" . consult-denote-grep))
   :config
   (consult-denote-mode 1))
+
 (use-package denote-sequence
   :ensure t
   :bind
@@ -1319,14 +1333,14 @@ Autocomplete for source block languages.
   :init
   (citar-denote-mode)
   :bind
-  (("C-c n b c" . citar-create-note)
-   ("C-c n b n" . citar-denote-open-note)
-   ("C-c n b x" . citar-denote-nocite)
+  (("C-c n c c" . citar-create-note)
+   ("C-c n c n" . citar-denote-open-note)
+   ("C-c n c x" . citar-denote-nocite)
    :map org-mode-map
-   ("C-c n b k" . citar-denote-add-citekey)
-   ("C-c n b K" . citar-denote-remove-citekey)
-   ("C-c n b d" . citar-denote-dwim)
-   ("C-c n b e" . citar-denote-open-reference-entry)))
+   ("C-c n c k" . citar-denote-add-citekey)
+   ("C-c n c K" . citar-denote-remove-citekey)
+   ("C-c n c d" . citar-denote-dwim)
+   ("C-c n c e" . citar-denote-open-reference-entry)))
 #+END_SRC
 * Content
 :PROPERTIES:
