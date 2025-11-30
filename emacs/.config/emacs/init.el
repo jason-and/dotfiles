@@ -103,7 +103,6 @@
         gcmh-high-cons-threshold (* 16 1024 1024))) ;; 16MB
 
 (electric-pair-mode 1)
-
 (use-package ews
   :straight nil
   :load-path "~/.config/emacs/lisp")
@@ -124,12 +123,13 @@
 
 ;; disable line numbers in certain modes
 (dolist (mode '(org-mode-hook
-    		term-mode-hook
-    		vterm-mode-hook
-    		R-mode-hook
-  		inferior-python-mode
-    		eshell-mode-hook
-    		eww-mode-hook))
+    		  term-mode-hook
+    		  vterm-mode-hook
+    		  R-mode-hook
+	        inferior-ess-r-mode-hook
+  		  inferior-python-mode
+    	          eshell-mode-hook
+    		  eww-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (setq visible-bell t            ; flash the bell rings
@@ -234,6 +234,9 @@
   :custom
   (line-spacing 3)
   (spacious-padding-mode 1))
+
+;; see colors
+(use-package rainbow-mode)
 
 ;; Highlight matching parentheses
 (show-paren-mode 1)
@@ -650,17 +653,20 @@
   :mode (("\\.R\\'" . ess-r-mode)
          ("\\.r\\'" . ess-r-mode)
          ("\\.Rmd\\'" . poly-markdown+r-mode))
-    :custom
-  (setq ess-ask-for-ess-directory nil)
+  :config
   (setq ess-local-process-name "R")
+  (setq inferior-R-args "--no-save --no-restore-data --quiet")
+  (setq ess-ask-for-ess-directory nil)
   (setq ess-use-flymake nil)
   (setq ess-use-eldoc nil)
   (setq ess-eldoc-show-on-symbol nil)
-  (setq inferior-R-args "--no-save --no-restore-data --quiet")
-  :config
+  (setq ess-use-R-completion nil)
   (setq ess-history-file nil) 
-  (setq ess-idle-timer-interval 0.5)
-
+  (setq ess-eval-visibly nil)
+  (setq ess-history-file nil)           ; Don't save command history (you have this)
+  (setq ess-idle-timer-interval 1.0)   
+  (setq comint-prompt-read-only t)
+  
   (define-key ess-r-mode-map (kbd "M--") #'my/insert-r-assignment)
   (define-key ess-r-mode-map (kbd "C-S-m") #'my/insert-r-pipe-native)
   
@@ -812,7 +818,6 @@
           (:results . "output")        ; Show console output
           (:exports . "both")          ; Export code and results
           (:cache . "no")              ; Don't cache (for interactive work)
-          (:prologue . "options(crayon.enabled = FALSE, cli.num_colors = 1)")
           (:tangle . "no"))))
 
 (defun my/babel-ansi-colorize-results ()
@@ -849,6 +854,37 @@
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)" "CANCELLED(c@/!)")
           (sequence "GOAL(g)" "|" "ACHIEVED(a!)" "ABANDONED(x@/!)")))
+
+(setq org-tag-alist
+        '(("parenting" . ?P)
+          ("home" . ?h)
+          ("finances" . ?$)
+          ("travel" . ?t)
+          ("photography" . ?p)
+          ("admin" . ?a)))
+
+  (setq org-agenda-custom-commands
+        '(("c" "Contexts"
+	   ((tags-todo "TODO=\"NEXT\""
+		       ((org-agenda-overriding-header "NEXT")))
+	    (tags-todo "admin"
+                       ((org-agenda-overriding-header "Admin Tasks")))
+	    (tags-todo "home"
+                       ((org-agenda-overriding-header "Home")))
+            (tags-todo "finances"
+                       ((org-agenda-overriding-header "Finances")))
+	    (tags-todo "travel"
+                       ((org-agenda-overriding-header "travel")))
+	    (tags-todo "photography"
+                       ((org-agenda-overriding-header "photography")))
+            	    (tags-todo "-{.*}"
+                       ((org-agenda-overriding-header "Untagged")))
+
+	;; View recent accomplishments
+	    ;((tags "CLOSED>=\"<-7d>\""
+            ;      ((org-agenda-overriding-header "✅ Completed Last 7 Days")))
+                   ;(org-agenda-files '("~/Documents/notes/archive.org")))
+	    ))))
 
   ;; Log when tasks are completed
   (setq org-log-done 'time)

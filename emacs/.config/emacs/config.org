@@ -1024,6 +1024,37 @@ Quick capture for ideas and tasks.
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)" "CANCELLED(c@/!)")
           (sequence "GOAL(g)" "|" "ACHIEVED(a!)" "ABANDONED(x@/!)")))
 
+(setq org-tag-alist
+        '(("parenting" . ?P)
+          ("home" . ?h)
+          ("finances" . ?$)
+          ("travel" . ?t)
+          ("photography" . ?p)
+          ("admin" . ?a)))
+
+  (setq org-agenda-custom-commands
+        '(("c" "Contexts"
+	   ((tags-todo "TODO=\"NEXT\""
+		       ((org-agenda-overriding-header "NEXT")))
+	    (tags-todo "admin"
+                       ((org-agenda-overriding-header "Admin Tasks")))
+	    (tags-todo "home"
+                       ((org-agenda-overriding-header "Home")))
+            (tags-todo "finances"
+                       ((org-agenda-overriding-header "Finances")))
+	    (tags-todo "travel"
+                       ((org-agenda-overriding-header "travel")))
+	    (tags-todo "photography"
+                       ((org-agenda-overriding-header "photography")))
+            	    (tags-todo "-{.*}"
+                       ((org-agenda-overriding-header "Untagged")))
+
+	;; View recent accomplishments
+	    ;((tags "CLOSED>=\"<-7d>\""
+            ;      ((org-agenda-overriding-header "✅ Completed Last 7 Days")))
+                   ;(org-agenda-files '("~/Documents/notes/archive.org")))
+	    ))))
+
   ;; Log when tasks are completed
   (setq org-log-done 'time)
   (setq org-log-into-drawer t))
