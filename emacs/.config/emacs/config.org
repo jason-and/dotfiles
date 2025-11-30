@@ -1074,9 +1074,6 @@ Quick capture for ideas and tasks.
   (setq org-log-into-drawer t))
 #+end_src
 
-#+RESULTS:
-: t
-
 *** Archive Settings
 :PROPERTIES:
 :ID:       153e1e24-6a40-4aad-9af3-04a485489470
