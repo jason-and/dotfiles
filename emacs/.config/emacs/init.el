@@ -916,7 +916,7 @@
     (with-selected-frame (make-frame '((name . "*Org Agenda*")))
       (switch-to-buffer "*scratch*")
       (delete-other-windows)
-      (org-agenda nil "a"))))
+      (org-agenda nil "c"))))
 
 (use-package org-modern
   :hook (org-mode . org-modern-mode))

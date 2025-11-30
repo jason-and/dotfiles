@@ -1102,7 +1102,7 @@ Opens agenda in its own frame (useful with your daemon setup).
     (with-selected-frame (make-frame '((name . "*Org Agenda*")))
       (switch-to-buffer "*scratch*")
       (delete-other-windows)
-      (org-agenda nil "a"))))
+      (org-agenda nil "c"))))
 #+end_src
 
 ** Org Visual Enhancements
