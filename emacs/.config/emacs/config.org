@@ -1034,8 +1034,16 @@ Quick capture for ideas and tasks.
 
   (setq org-agenda-custom-commands
         '(("c" "Contexts"
-	   ((tags-todo "TODO=\"NEXT\""
+	   (
+	    ;; To do next
+	    (tags-todo "TODO=\"NEXT\""
 		       ((org-agenda-overriding-header "NEXT")))
+
+
+	    ;; scheduled for today
+	    ;; due this week
+	    
+	    ;; main tags
 	    (tags-todo "admin"
                        ((org-agenda-overriding-header "Admin Tasks")))
 	    (tags-todo "home"
@@ -1046,7 +1054,13 @@ Quick capture for ideas and tasks.
                        ((org-agenda-overriding-header "travel")))
 	    (tags-todo "photography"
                        ((org-agenda-overriding-header "photography")))
-            	    (tags-todo "-{.*}"
+
+	    ;; misc tags
+	    (tags-todo "-admin-home-finances-travel-photography"
+                       ((org-agenda-overriding-header "misc")))
+
+	    ;; untagged
+	    (tags-todo "-{.*}"
                        ((org-agenda-overriding-header "Untagged")))
 
 	;; View recent accomplishments
@@ -1059,6 +1073,9 @@ Quick capture for ideas and tasks.
   (setq org-log-done 'time)
   (setq org-log-into-drawer t))
 #+end_src
+
+#+RESULTS:
+: t
 
 *** Archive Settings
 :PROPERTIES:

@@ -865,8 +865,16 @@
 
   (setq org-agenda-custom-commands
         '(("c" "Contexts"
-	   ((tags-todo "TODO=\"NEXT\""
+	   (
+	    ;; To do next
+	    (tags-todo "TODO=\"NEXT\""
 		       ((org-agenda-overriding-header "NEXT")))
+
+
+	    ;; scheduled for today
+	    ;; due this week
+	    
+	    ;; main tags
 	    (tags-todo "admin"
                        ((org-agenda-overriding-header "Admin Tasks")))
 	    (tags-todo "home"
@@ -877,7 +885,13 @@
                        ((org-agenda-overriding-header "travel")))
 	    (tags-todo "photography"
                        ((org-agenda-overriding-header "photography")))
-            	    (tags-todo "-{.*}"
+
+	    ;; misc tags
+	    (tags-todo "-admin-home-finances-travel-photography"
+                       ((org-agenda-overriding-header "misc")))
+
+	    ;; untagged
+	    (tags-todo "-{.*}"
                        ((org-agenda-overriding-header "Untagged")))
 
 	;; View recent accomplishments
