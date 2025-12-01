@@ -43,6 +43,8 @@
 
 ;;;Core System Settings
 
+(use-package diminish :ensure t)
+
 ;; use zshell
 (use-package exec-path-from-shell
   :config
@@ -100,7 +102,8 @@
   :init (gcmh-mode 1)
   :config
   (setq gcmh-idle-delay 5
-        gcmh-high-cons-threshold (* 16 1024 1024))) ;; 16MB
+        gcmh-high-cons-threshold (* 16 1024 1024)) ;; 16MB
+  :diminish gcmh-mode)
 
 (electric-pair-mode 1)
 (use-package ews
@@ -166,48 +169,40 @@
 (use-package modus-themes
   :config
   (mapc #'disable-theme custom-enabled-themes)
-  (setq modus-themes-italic-constructs t
-   	modus-themes-bold-constructs t)
   (modus-themes-include-derivatives-mode 1)
 
-  (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+  :bind ("<f5>" . modus-themes-toggle)
+  :custom
+  (modus-themes-mixed-fonts t)
+  (modus-themes-variable-pitch-ui t)
+  (modus-themes-italic-constructs t)
+  (modus-themes-bold-constructs t)
+  (modus-themes-completions '((t . (bold))))
+  (modus-themes-prompts '(bold))
+  (modus-themes-headings
+         '((agenda-structure . (variable-pitch light 2.2))
+          (agenda-date . (variable-pitch regular 1.3))
+          (t . (regular 1.15))))
+  )
 
-(use-package ef-themes
-  :config
-  (setq ef-themes-to-toggle '(ef-day ef-owl))
-  (load-theme 'ef-day :no-confirm-loading))
+(use-package ef-themes)
 
 (use-package doric-themes
   :defer t)
 
 (use-package theme-buffet
-  :after (modus-themes ef-themes doric-themes)
-  :config
-  (require 'cal-dst)
-  
-  ;; Auto-adjust for DST
-  (setopt theme-buffet-time-offset
-          (1+ (/ (cadr (calendar-current-time-zone)) 60)))
-  
-  ;; Custom theme schedule (6 periods = 4 hours each)
-  ;; Adjust the number of periods to change the division
-  (setopt theme-buffet-end-user
-          '(:night     (modus-vivendi ef-dark ef-autumn ef-night ef-duo-dark ef-symbiosis)
-            :dawn      (ef-frost ef-winter)
-            :morning   (modus-operandi ef-light ef-cyprus ef-spring ef-duo-light)
-            :afternoon (modus-operandi-tinted ef-arbutus ef-day ef-kassio ef-summer ef-elea-light ef-maris-light ef-melissa-light ef-trio-light ef-reverie)
-            :evening   (modus-vivendi-tinted ef-rosa ef-elea-dark ef-maris-dark ef-melissa-dark ef-trio-dark ef-dream)
-            :dusk      (ef-bio ef-duo-dark)))
-  
-  ;; Use your custom configuration
-  (setq theme-buffet-menu 'end-user)
-  
-  ;; Start period-based switching
-  (theme-buffet-end-user)
-  
-  ;; Enable mode
-  (theme-buffet-mode 1))
-
+      :after (modus-themes ef-themes)  ; add your favorite themes here
+      :init
+      ;; variable below needs to be set when you just want to use the timers mins/hours
+      (setq theme-buffet-menu 'modus-ef) ; changing default value from built-in to modus-ef
+      :config
+      ;;; one of the three below can be uncommented
+      ;; (theme-buffet-modus-ef)
+      ;; (theme-buffet-built-in)
+      ;; (theme-buffet-end-user)
+      ;;; two additional timers are available for theme change, both can be set
+      (theme-buffet-timer-mins 25)  ; change theme every 25m from now, similar below
+      (theme-buffet-timer-hours 2))
 
 (use-package nerd-icons)
 
@@ -226,7 +221,6 @@
   (dired-mode . nerd-icons-dired-mode))
 
 (use-package spacious-padding
-  :straight t
   :config
   (setq spacious-padding-subtle-frame-lines
      	`( :mode-line-active 'default
@@ -343,7 +337,8 @@
 (use-package evil-collection
   :after evil
   :config
-  (evil-collection-init))
+  (evil-collection-init)
+  :diminish evil-collection-unimpaired-mode)
 
 ;; More comprehensive escape key behavior
 (use-package evil-escape
@@ -351,17 +346,21 @@
   (evil-escape-mode)
   :config
   (setq-default evil-escape-key-sequence "jk")
-  (setq-default evil-escape-delay 0.2))
+  (setq-default evil-escape-delay 0.2)
+  :diminish evil-escape-mode)
 
 (use-package evil-surround
   :after evil
   :config
-  (global-evil-surround-mode 1))
+  (global-evil-surround-mode 1)
+  :diminish evil-surround-mode
+  )
 
 (use-package evil-commentary
   :after evil
   :config
-  (evil-commentary-mode))
+  (evil-commentary-mode)
+  :diminish evil-commentary-mode)
 
   ;;; Which Key
 (use-package which-key
@@ -762,6 +761,9 @@
   (org-image-actual-width '(450))
   (org-pretty-entities t)
   (org-use-sub-superscripts "{}")
+  (org-fold-catch-invisible-edits 'show)
+  (org-fontify-quote-and-verse-blocks t)
+  (org-fontify-whole-block-delimiter-line t)
 
   ;; Editing behavior
   (org-M-RET-may-split-line '((default . nil)))
@@ -770,7 +772,10 @@
   (org-fold-catch-invisible-edits 'show-and-error)
 
   ;; Links
-  (org-id-link-to-org-use-id t))
+  (org-id-link-to-org-use-id t)
+  (org-refile-targets '((org-agenda-files :maxlevel . 3)))
+  (org-refile-allow-creating-parent-nodes 'confirm)
+ )
 
 (use-package org
   :config
@@ -850,12 +855,15 @@
   (setq org-agenda-files '("~/Documents/notes")))
 
 (use-package org
-  :config
-  (setq org-todo-keywords
+  :custom
+  (org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)" "CANCELLED(c@/!)")
           (sequence "GOAL(g)" "|" "ACHIEVED(a!)" "ABANDONED(x@/!)")))
 
-(setq org-tag-alist
+  (org-enforce-todo-dependencies t)
+  (org-enforce-todo-checkbox-dependencies t)
+  
+  (org-tag-alist
         '(("parenting" . ?P)
           ("home" . ?h)
           ("finances" . ?$)
@@ -863,9 +871,14 @@
           ("photography" . ?p)
           ("admin" . ?a)))
 
-  (setq org-agenda-custom-commands
+  (org-agenda-custom-commands
         '(("c" "Contexts"
 	   (
+	    (todo "GOAL"
+		       ((org-agenda-overriding-header "Goals")))
+
+
+
 	    ;; To do next
 	    (tags-todo "TODO=\"NEXT\""
 		       ((org-agenda-overriding-header "NEXT")))
@@ -900,9 +913,19 @@
                    ;(org-agenda-files '("~/Documents/notes/archive.org")))
 	    ))))
 
+  (org-agenda-prefix-format
+          '((agenda . " %i %-12:c%?-12t% s")
+            (todo . " %i %-12:c")
+            (tags . " %i %-12:c")
+            (search . " %i %-12:c")))
+  
+  (org-agenda-todo-keyword-format "%-1s")
+  (org-agenda-fontify-priorities 'cookies)
+  
+  
   ;; Log when tasks are completed
-  (setq org-log-done 'time)
-  (setq org-log-into-drawer t))
+  (org-log-done 'time)
+  (org-log-into-drawer t))
 
 (use-package org
   :config
