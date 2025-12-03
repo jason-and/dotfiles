@@ -653,7 +653,6 @@
          ("\\.r\\'" . ess-r-mode)
          ("\\.Rmd\\'" . poly-markdown+r-mode))
   :config
-  (setq ess-local-process-name "R")
   (setq inferior-R-args "--no-save --no-restore-data --quiet")
   (setq ess-ask-for-ess-directory nil)
   (setq ess-use-flymake nil)
@@ -661,9 +660,8 @@
   (setq ess-eldoc-show-on-symbol nil)
   (setq ess-use-R-completion nil)
   (setq ess-history-file nil) 
-  (setq ess-eval-visibly nil)
-  (setq ess-history-file nil)           ; Don't save command history (you have this)
-  (setq ess-idle-timer-interval 1.0)   
+  (setq ess-history-file nil)
+  (setq comint-move-point-for-output t) 
   (setq comint-prompt-read-only t)
   
   (define-key ess-r-mode-map (kbd "M--") #'my/insert-r-assignment)
@@ -852,7 +850,7 @@
 
 (use-package org
   :config
-  (setq org-agenda-files '("~/Documents/notes")))
+  (setq org-agenda-files '("~/Documents/notes/inbox.org" "~/Documents/notes/projects.org")))
 
 (use-package org
   :custom
