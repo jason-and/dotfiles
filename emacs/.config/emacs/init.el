@@ -380,7 +380,10 @@
 
 ;; minibuffer completion
 (use-package vertico
-  :config (vertico-mode))
+  :config (vertico-mode)
+  :custom
+    (vertico-count 15) ;; Show more candidates
+  )
 
 
 ;; Emacs minibuffer configurations.
@@ -401,8 +404,8 @@
 
 
 ;; vertico uses posframe (frame in center of screen)
-(use-package vertico-posframe
-  :init (vertico-posframe-mode 1))
+;(use-package vertico-posframe
+;  :init (vertico-posframe-mode 1))
 
 ;; adds helpful info about options in minibuffer
 (use-package marginalia
@@ -542,7 +545,7 @@
 
 ;; Syntax checking
 (use-package flycheck
-  :init (global-flycheck-mode))
+  :config (global-flycheck-mode))
 
 (use-package flycheck-eglot
   :after (flycheck eglot)
@@ -550,7 +553,7 @@
   (global-flycheck-eglot-mode 1))
 
 (use-package yasnippet
-  :init (yas-global-mode 1))
+  :config (yas-global-mode 1))
 
 (use-package yasnippet-snippets) ;; Collection of snippets
 
@@ -615,14 +618,13 @@
 ;;;; Python
 (use-package python
   :straight nil
-  :init
   :config
   (setq python-indent-offset 4)
   (setq python-shell-completion-native-enable nil))
 
 (use-package uv
   :straight (uv :type git :host github :repo "johannes-mueller/uv.el")
-  :init
+  :config
   (add-to-list 'treesit-language-source-alist '(toml "https://github.com/tree-sitter-grammars/tree-sitter-toml"))
   (unless (treesit-language-available-p 'toml)
     (treesit-install-language-grammar 'toml)))
@@ -953,9 +955,8 @@
   :straight nil
   :hook
   (text-mode . visual-line-mode)
-  :init
-  (delete-selection-mode t)
   :custom
+  (delete-selection-mode t)
   (sentence-end-double-space nil)
   (scroll-error-top-bottom t)
   (save-interprogram-paste-before-kill t))
@@ -1123,7 +1124,7 @@
   :bind
   (("C-c d f" . consult-notes)
    ("C-c d g" . consult-notes-search-in-all-notes))
-  :init
+  :config
   (consult-notes-denote-mode))
 
 (use-package consult-denote
@@ -1158,7 +1159,7 @@
   :custom
   (citar-bibliography '("~/Documents/library/all.bib"))
   (citar-open-always-create-notes t)
-  :init
+  :config
   (citar-denote-mode)
   :bind
   (("C-c n c c" . citar-create-note)
@@ -1224,7 +1225,7 @@
 
 ;; Read ePub files
 (use-package nov
-  :init
+  :custom
   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 
 ;; Read RSS feeds with Elfeed
