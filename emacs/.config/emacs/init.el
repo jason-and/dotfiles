@@ -167,23 +167,24 @@
   (popper-echo-mode +1))                ; For echo area hints
 
 (use-package modus-themes
+  :ensure t 
   :config
-  (mapc #'disable-theme custom-enabled-themes)
+  
   (modus-themes-include-derivatives-mode 1)
-
-  :bind ("<f5>" . modus-themes-toggle)
-  :custom
-  (modus-themes-mixed-fonts t)
-  (modus-themes-variable-pitch-ui t)
-  (modus-themes-italic-constructs t)
-  (modus-themes-bold-constructs t)
-  (modus-themes-completions '((t . (bold))))
-  (modus-themes-prompts '(bold))
-  (modus-themes-headings
+  (setq modus-themes-mixed-fonts t)
+        modus-themes-variable-pitch-ui t
+	modus-themes-italic-constructs t
+	modus-themes-bold-constructs t
+	modus-themes-completions '((t . (bold)))
+	modus-themes-prompts '(bold)
+	modus-themes-headings
          '((agenda-structure . (variable-pitch light 2.2))
           (agenda-date . (variable-pitch regular 1.3))
-          (t . (regular 1.15))))
-  )
+          (t . (regular 1.15)))
+
+	 (modus-themes-load-theme 'modus-vivendi-tinted)
+
+    :bind ("<f5>" . modus-themes-toggle))
 
 (use-package ef-themes)
 
@@ -376,6 +377,7 @@
   (which-key-popup-type 'minibuffer))
 
   ;;; Completion Framework
+
 ;; minibuffer completion
 (use-package vertico
   :config (vertico-mode))
